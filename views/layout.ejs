@@ -3,10 +3,9 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title><%= title || "Hybrid Solar Monitoring" %></title>
+<title><%= title || "SolarWatch" %></title>
 
 <link
 rel="stylesheet"
@@ -30,12 +29,48 @@ body{
 }
 
 /* =========================
-   LAYOUT
+   HEADER
 ========================= */
 
-.layout{
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:70px;
+    background:#0c5f2c;
+    color:white;
     display:flex;
-    min-height:100vh;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    z-index:1200;
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
+
+.header-title{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.header-title span{
+    color:#8fffb1;
+}
+
+.menu-btn{
+    width:45px;
+    height:45px;
+    border:none;
+    border-radius:10px;
+    background:rgba(255,255,255,.12);
+    color:white;
+    cursor:pointer;
+    font-size:20px;
+    transition:.3s;
+}
+
+.menu-btn:hover{
+    background:rgba(255,255,255,.2);
 }
 
 /* =========================
@@ -43,25 +78,22 @@ body{
 ========================= */
 
 .sidebar{
-    width:260px;
+    position:fixed;
+    top:70px;
+    right:-300px;
+    width:280px;
+    height:calc(100vh - 70px);
     background:#0c5f2c;
     color:white;
     padding:20px;
-    position:fixed;
-    top:0;
-    left:0;
-    bottom:0;
     overflow-y:auto;
+    transition:.35s ease;
+    z-index:1100;
+    box-shadow:-5px 0 20px rgba(0,0,0,.15);
 }
 
-.logo{
-    font-size:24px;
-    font-weight:bold;
-    margin-bottom:30px;
-}
-
-.logo span{
-    color:#8fffb1;
+.sidebar.active{
+    right:0;
 }
 
 .nav-links{
@@ -79,6 +111,7 @@ body{
     display:flex;
     align-items:center;
     gap:12px;
+    font-size:15px;
 }
 
 .nav-links a:hover{
@@ -91,13 +124,31 @@ body{
 }
 
 /* =========================
+   OVERLAY
+========================= */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.4);
+    opacity:0;
+    visibility:hidden;
+    transition:.3s;
+    z-index:1000;
+}
+
+.overlay.active{
+    opacity:1;
+    visibility:visible;
+}
+
+/* =========================
    MAIN
 ========================= */
 
 .main{
-    flex:1;
-    margin-left:260px;
-    padding:25px;
+    padding:95px 25px 90px;
+    min-height:100vh;
 }
 
 /* =========================
@@ -113,12 +164,15 @@ body{
     justify-content:space-between;
     align-items:center;
     box-shadow:0 5px 20px rgba(0,0,0,.05);
+    flex-wrap:wrap;
+    gap:15px;
 }
 
 .topbar-right{
     display:flex;
     align-items:center;
     gap:15px;
+    flex-wrap:wrap;
 }
 
 .badge{
@@ -186,6 +240,9 @@ body{
 table{
     width:100%;
     border-collapse:collapse;
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
 }
 
 table th,
@@ -243,42 +300,77 @@ table th{
 }
 
 /* =========================
+   FOOTER
+========================= */
+
+.footer{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:55px;
+    background:#0c5f2c;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    z-index:1200;
+    box-shadow:0 -4px 15px rgba(0,0,0,.08);
+}
+
+/* =========================
    MOBILE
 ========================= */
 
-@media(max-width:900px){
+@media(max-width:768px){
 
-    .sidebar{
-        width:100%;
-        position:relative;
-        height:auto;
+    .header{
+        padding:0 18px;
     }
 
     .main{
-        margin-left:0;
+        padding:90px 15px 85px;
     }
 
-    .layout{
-        flex-direction:column;
+    .topbar{
+        padding:16px;
     }
+
+    .sidebar{
+        width:100%;
+        right:-100%;
+    }
+
 }
 
 </style>
 
 </head>
+
 <body>
 
-<div class="layout">
+<!-- =========================
+     HEADER
+========================= -->
+
+<header class="header">
+
+<div class="header-title">
+Solar<span>Watch</span>
+</div>
+
+<button class="menu-btn" id="menuBtn">
+    <i class="fas fa-bars"></i>
+</button>
+
+</header>
 
 <!-- =========================
      SIDEBAR
 ========================= -->
 
-<div class="sidebar">
-
-<div class="logo">
-Solar<span>Watch</span>
-</div>
+<div class="sidebar" id="sidebar">
 
 <div class="nav-links">
 
@@ -366,6 +458,12 @@ Solar<span>Watch</span>
 </div>
 
 <!-- =========================
+     OVERLAY
+========================= -->
+
+<div class="overlay" id="overlay"></div>
+
+<!-- =========================
      MAIN
 ========================= -->
 
@@ -423,7 +521,31 @@ Solar<span>Watch</span>
 
 </div>
 
-</div>
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer class="footer">
+© <%= new Date().getFullYear() %> SolarWatch
+</footer>
+
+<script>
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+
+menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+    overlay.classList.toggle("active");
+});
+
+overlay.addEventListener("click", () => {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+});
+
+</script>
 
 </body>
 </html>
