@@ -1,0 +1,36 @@
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+O&M Request History
+</h3>
+
+<table>
+
+<tr>
+<th>Title</th>
+<th>Status</th>
+<th>Response</th>
+<th>Date</th>
+</tr>
+
+<% requests.forEach(request => { %>
+
+<tr>
+
+<td><%= request.title %></td>
+
+<td><%= request.status %></td>
+
+<td><%= request.adminResponse || 'Pending' %></td>
+
+<td>
+<%= request.createdAt.toDateString() %>
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
