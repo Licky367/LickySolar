@@ -1,0 +1,565 @@
+<div class="grid">
+
+<!-- =========================
+     TOTAL FAULTS
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Total Faults
+</div>
+
+<div class="card-value">
+<%= faults.length %>
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Detected system fault events
+</p>
+
+</div>
+
+<!-- =========================
+     ACTIVE FAULTS
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Active Faults
+</div>
+
+<div class="card-value">
+
+<%= faults.filter(fault => !fault.resolved).length %>
+
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Faults awaiting resolution
+</p>
+
+</div>
+
+<!-- =========================
+     RESOLVED FAULTS
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Resolved Faults
+</div>
+
+<div class="card-value">
+
+<%= faults.filter(fault => fault.resolved).length %>
+
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Successfully handled faults
+</p>
+
+</div>
+
+<!-- =========================
+     CRITICAL FAULTS
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Critical Faults
+</div>
+
+<div class="card-value">
+
+<%= faults.filter(
+fault => fault.severity === "critical"
+).length %>
+
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+High-risk system conditions
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- =========================
+     FAULT LOG TABLE
+========================= -->
+
+<div class="card">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:15px;
+">
+
+<div>
+
+<h3>
+Fault Monitoring Logs
+</h3>
+
+<p style="
+margin-top:5px;
+color:#666;
+">
+Track all detected system anomalies
+</p>
+
+</div>
+
+<div class="badge">
+Live Monitoring
+</div>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>Fault Type</th>
+
+<th>Source</th>
+
+<th>Severity</th>
+
+<th>Status</th>
+
+<th>Description</th>
+
+<th>Date</th>
+
+</tr>
+
+<% faults.forEach(fault => { %>
+
+<tr>
+
+<td>
+
+<div style="
+display:flex;
+align-items:center;
+gap:10px;
+">
+
+<div style="
+width:42px;
+height:42px;
+border-radius:12px;
+
+background:
+<%= fault.severity === 'critical'
+? '#ffe5e5'
+: fault.severity === 'high'
+? '#fff0db'
+: fault.severity === 'medium'
+? '#fff5d9'
+: '#e7fff0'
+%>;
+
+color:
+<%= fault.severity === 'critical'
+? '#c40000'
+: fault.severity === 'high'
+? '#ff6b00'
+: fault.severity === 'medium'
+? '#946200'
+: '#0c5f2c'
+%>;
+
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+">
+
+<i class="fas fa-triangle-exclamation"></i>
+
+</div>
+
+<div>
+
+<strong>
+<%= fault.faultType %>
+</strong>
+
+</div>
+
+</div>
+
+</td>
+
+<td>
+
+<span style="
+text-transform:capitalize;
+">
+
+<%= fault.source %>
+
+</span>
+
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= fault.severity === 'critical'
+? '#ffe5e5'
+: fault.severity === 'high'
+? '#fff0db'
+: fault.severity === 'medium'
+? '#fff5d9'
+: '#e7fff0'
+%>;
+
+color:
+<%= fault.severity === 'critical'
+? '#c40000'
+: fault.severity === 'high'
+? '#ff6b00'
+: fault.severity === 'medium'
+? '#946200'
+: '#0c5f2c'
+%>;
+">
+
+<%= fault.severity %>
+
+</span>
+
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= fault.resolved
+? '#e7fff0'
+: '#ffe5e5'
+%>;
+
+color:
+<%= fault.resolved
+? '#0c5f2c'
+: '#c40000'
+%>;
+">
+
+<%= fault.resolved
+? 'Resolved'
+: 'Active'
+%>
+
+</span>
+
+</td>
+
+<td style="
+max-width:300px;
+line-height:1.6;
+">
+
+<%= fault.description %>
+
+</td>
+
+<td>
+
+<div>
+<%= fault.createdAt.toDateString() %>
+</div>
+
+<small style="color:#777;">
+<%= fault.createdAt.toLocaleTimeString() %>
+</small>
+
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
+
+<br>
+
+<!-- =========================
+     FAULT ANALYSIS
+========================= -->
+
+<div class="grid">
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Fault Severity Analysis
+</h3>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:15px;
+">
+
+<div>
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+">
+
+<span>Critical</span>
+
+<span>
+<%= faults.filter(
+f => f.severity === 'critical'
+).length %>
+</span>
+
+</div>
+
+<div style="
+height:10px;
+background:#f1f1f1;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:
+<%= faults.length
+? (
+faults.filter(
+f => f.severity === 'critical'
+).length / faults.length
+) * 100
+: 0 %>%;
+background:#c40000;
+">
+
+</div>
+
+</div>
+
+</div>
+
+<div>
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+">
+
+<span>High</span>
+
+<span>
+<%= faults.filter(
+f => f.severity === 'high'
+).length %>
+</span>
+
+</div>
+
+<div style="
+height:10px;
+background:#f1f1f1;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:
+<%= faults.length
+? (
+faults.filter(
+f => f.severity === 'high'
+).length / faults.length
+) * 100
+: 0 %>%;
+background:#ff6b00;
+">
+
+</div>
+
+</div>
+
+</div>
+
+<div>
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+">
+
+<span>Medium</span>
+
+<span>
+<%= faults.filter(
+f => f.severity === 'medium'
+).length %>
+</span>
+
+</div>
+
+<div style="
+height:10px;
+background:#f1f1f1;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:
+<%= faults.length
+? (
+faults.filter(
+f => f.severity === 'medium'
+).length / faults.length
+) * 100
+: 0 %>%;
+background:#d4a017;
+">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+System Recommendations
+</h3>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:15px;
+">
+
+<div style="
+padding:15px;
+background:#f7faf9;
+border-left:5px solid #0c5f2c;
+border-radius:10px;
+">
+
+<strong>
+Routine Maintenance
+</strong>
+
+<p style="
+margin-top:8px;
+color:#666;
+line-height:1.6;
+">
+Perform regular inspection of
+solar panels, inverter,
+and battery connections.
+</p>
+
+</div>
+
+<div style="
+padding:15px;
+background:#fff8e8;
+border-left:5px solid #d4a017;
+border-radius:10px;
+">
+
+<strong>
+Battery Monitoring
+</strong>
+
+<p style="
+margin-top:8px;
+color:#666;
+line-height:1.6;
+">
+Frequent voltage drops may indicate
+battery degradation or overload.
+</p>
+
+</div>
+
+<div style="
+padding:15px;
+background:#ffecec;
+border-left:5px solid #c40000;
+border-radius:10px;
+">
+
+<strong>
+Critical Alerts
+</strong>
+
+<p style="
+margin-top:8px;
+color:#666;
+line-height:1.6;
+">
+Immediate technician intervention is
+recommended for critical faults.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
