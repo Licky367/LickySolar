@@ -1,0 +1,43 @@
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Clients
+</h3>
+
+<table>
+
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Action</th>
+</tr>
+
+<% clients.forEach(client => { %>
+
+<tr>
+
+<td><%= client.name %></td>
+
+<td><%= client.email %></td>
+
+<td><%= client.phone %></td>
+
+<td>
+
+<a
+href="/admin/client/<%= client._id %>"
+class="btn btn-green"
+>
+Open
+</a>
+
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
