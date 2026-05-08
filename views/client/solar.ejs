@@ -1,9 +1,135 @@
+<style>
+
+/* =========================
+   GRID LAYOUT
+========================= */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:20px;
+    width:100%;
+}
+
+/* =========================
+   CARD
+========================= */
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    overflow:hidden;
+}
+
+/* =========================
+   CARD TEXT
+========================= */
+.card-title{
+    font-size:16px;
+    color:#666;
+    margin-bottom:12px;
+}
+
+.card-value{
+    font-size:32px;
+    font-weight:bold;
+    color:#111;
+}
+
+/* =========================
+   BADGE
+========================= */
+.badge{
+    padding:10px 16px;
+    background:#f4f4f4;
+    border-radius:30px;
+    font-weight:600;
+    font-size:14px;
+}
+
+/* =========================
+   TABLE WRAPPER
+========================= */
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+/* Optional scrollbar */
+.table-wrapper::-webkit-scrollbar{
+    height:8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb{
+    background:#ccc;
+    border-radius:20px;
+}
+
+/* =========================
+   TABLE
+========================= */
+table{
+    width:100%;
+    min-width:950px;
+    border-collapse:collapse;
+}
+
+th{
+    background:#f8f8f8;
+    padding:15px;
+    text-align:left;
+    font-size:14px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    white-space:nowrap;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media(max-width:768px){
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .card{
+        padding:16px;
+    }
+
+    .card-value{
+        font-size:26px;
+    }
+
+    h2{
+        font-size:22px;
+    }
+
+    h3{
+        font-size:18px;
+    }
+
+    th, td{
+        padding:12px;
+        font-size:14px;
+    }
+
+}
+
+</style>
+
+
 <div class="grid">
 
 <!-- =========================
      SOLAR POWER
 ========================= -->
-
 <div class="card">
 
 <div class="card-title">
@@ -26,7 +152,6 @@ Current generated solar power
 <!-- =========================
      SOLAR VOLTAGE
 ========================= -->
-
 <div class="card">
 
 <div class="card-title">
@@ -49,7 +174,6 @@ Panel voltage monitoring
 <!-- =========================
      SOLAR CURRENT
 ========================= -->
-
 <div class="card">
 
 <div class="card-title">
@@ -72,7 +196,6 @@ Current flowing from panels
 <!-- =========================
      SOLAR EFFICIENCY
 ========================= -->
-
 <div class="card">
 
 <div class="card-title">
@@ -99,7 +222,6 @@ Solar conversion efficiency
 <!-- =========================
      STATUS + TEMPERATURE
 ========================= -->
-
 <div class="grid">
 
 <div class="card">
@@ -151,9 +273,7 @@ font-size:28px;
 margin-bottom:8px;
 text-transform:capitalize;
 ">
-
 <%= readings[0]?.status || 'Unknown' %>
-
 </h2>
 
 <p style="color:#666;">
@@ -197,9 +317,7 @@ font-size:28px;
 <div>
 
 <h2 style="margin-bottom:8px;">
-
 <%= readings[0]?.temperature || 0 %> °C
-
 </h2>
 
 <p style="color:#666;">
@@ -219,7 +337,6 @@ Solar thermal monitoring
 <!-- =========================
      SOLAR HISTORY TABLE
 ========================= -->
-
 <div class="card">
 
 <div style="
@@ -252,24 +369,18 @@ Historical solar generation records
 
 </div>
 
+<div class="table-wrapper">
+
 <table>
 
 <tr>
-
 <th>Voltage</th>
-
 <th>Current</th>
-
 <th>Power</th>
-
 <th>Efficiency</th>
-
 <th>Status</th>
-
 <th>Temperature</th>
-
 <th>Date</th>
-
 </tr>
 
 <% readings.forEach(reading => { %>
@@ -347,12 +458,13 @@ color:
 
 </div>
 
+</div>
+
 <br>
 
 <!-- =========================
      PERFORMANCE ANALYSIS
 ========================= -->
-
 <div class="grid">
 
 <div class="card">
@@ -476,6 +588,7 @@ overflow:hidden;
 
 <div style="
 height:100%;
+
 width:
 <%= readings.length
 ? (
@@ -484,6 +597,7 @@ r => r.status === 'active'
 ).length / readings.length
 ) * 100
 : 0 %>%;
+
 background:#0c5f2c;
 ">
 
@@ -520,6 +634,7 @@ overflow:hidden;
 
 <div style="
 height:100%;
+
 width:
 <%= readings.length
 ? (
@@ -528,6 +643,7 @@ r => r.status === 'low'
 ).length / readings.length
 ) * 100
 : 0 %>%;
+
 background:#d4a017;
 ">
 
@@ -564,6 +680,7 @@ overflow:hidden;
 
 <div style="
 height:100%;
+
 width:
 <%= readings.length
 ? (
@@ -572,6 +689,7 @@ r => r.status === 'fault'
 ).length / readings.length
 ) * 100
 : 0 %>%;
+
 background:#c40000;
 ">
 
