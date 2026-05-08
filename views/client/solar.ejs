@@ -1,0 +1,588 @@
+<div class="grid">
+
+<!-- =========================
+     SOLAR POWER
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Solar Output Power
+</div>
+
+<div class="card-value">
+<%= readings[0]?.power || 0 %> W
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Current generated solar power
+</p>
+
+</div>
+
+<!-- =========================
+     SOLAR VOLTAGE
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Solar Voltage
+</div>
+
+<div class="card-value">
+<%= readings[0]?.voltage || 0 %> V
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Panel voltage monitoring
+</p>
+
+</div>
+
+<!-- =========================
+     SOLAR CURRENT
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Solar Current
+</div>
+
+<div class="card-value">
+<%= readings[0]?.current || 0 %> A
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Current flowing from panels
+</p>
+
+</div>
+
+<!-- =========================
+     SOLAR EFFICIENCY
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Efficiency
+</div>
+
+<div class="card-value">
+<%= readings[0]?.efficiency || 0 %>%
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Solar conversion efficiency
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- =========================
+     STATUS + TEMPERATURE
+========================= -->
+
+<div class="grid">
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Panel Status
+</h3>
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+">
+
+<div style="
+width:65px;
+height:65px;
+border-radius:16px;
+
+background:
+<%= readings[0]?.status === 'active'
+? '#e7fff0'
+: readings[0]?.status === 'low'
+? '#fff5d9'
+: '#ffe5e5'
+%>;
+
+color:
+<%= readings[0]?.status === 'active'
+? '#0c5f2c'
+: readings[0]?.status === 'low'
+? '#946200'
+: '#c40000'
+%>;
+
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+">
+
+<i class="fas fa-solar-panel"></i>
+
+</div>
+
+<div>
+
+<h2 style="
+margin-bottom:8px;
+text-transform:capitalize;
+">
+
+<%= readings[0]?.status || 'Unknown' %>
+
+</h2>
+
+<p style="color:#666;">
+Solar operational condition
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Panel Temperature
+</h3>
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+">
+
+<div style="
+width:65px;
+height:65px;
+border-radius:16px;
+background:#fff1e6;
+color:#ff6b00;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+">
+
+<i class="fas fa-temperature-high"></i>
+
+</div>
+
+<div>
+
+<h2 style="margin-bottom:8px;">
+
+<%= readings[0]?.temperature || 0 %> °C
+
+</h2>
+
+<p style="color:#666;">
+Solar thermal monitoring
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- =========================
+     SOLAR HISTORY TABLE
+========================= -->
+
+<div class="card">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:15px;
+">
+
+<div>
+
+<h3>
+Solar Monitoring History
+</h3>
+
+<p style="
+margin-top:5px;
+color:#666;
+">
+Historical solar generation records
+</p>
+
+</div>
+
+<div class="badge">
+<%= readings.length %> Records
+</div>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>Voltage</th>
+
+<th>Current</th>
+
+<th>Power</th>
+
+<th>Efficiency</th>
+
+<th>Status</th>
+
+<th>Temperature</th>
+
+<th>Date</th>
+
+</tr>
+
+<% readings.forEach(reading => { %>
+
+<tr>
+
+<td>
+<%= reading.voltage %> V
+</td>
+
+<td>
+<%= reading.current %> A
+</td>
+
+<td>
+<%= reading.power %> W
+</td>
+
+<td>
+<%= reading.efficiency %>%
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= reading.status === 'active'
+? '#e7fff0'
+: reading.status === 'low'
+? '#fff5d9'
+: '#ffe5e5'
+%>;
+
+color:
+<%= reading.status === 'active'
+? '#0c5f2c'
+: reading.status === 'low'
+? '#946200'
+: '#c40000'
+%>;
+">
+
+<%= reading.status %>
+
+</span>
+
+</td>
+
+<td>
+<%= reading.temperature %> °C
+</td>
+
+<td>
+
+<div>
+<%= reading.createdAt.toDateString() %>
+</div>
+
+<small style="color:#777;">
+<%= reading.createdAt.toLocaleTimeString() %>
+</small>
+
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
+
+<br>
+
+<!-- =========================
+     PERFORMANCE ANALYSIS
+========================= -->
+
+<div class="grid">
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Solar Performance Insights
+</h3>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:18px;
+">
+
+<div style="
+padding:15px;
+background:#f7faf9;
+border-left:5px solid #0c5f2c;
+border-radius:10px;
+">
+
+<strong>
+Optimal Generation
+</strong>
+
+<p style="
+margin-top:8px;
+color:#666;
+line-height:1.6;
+">
+Higher efficiency values indicate
+better solar harvesting conditions.
+</p>
+
+</div>
+
+<div style="
+padding:15px;
+background:#fff8e8;
+border-left:5px solid #d4a017;
+border-radius:10px;
+">
+
+<strong>
+Low Output Detection
+</strong>
+
+<p style="
+margin-top:8px;
+color:#666;
+line-height:1.6;
+">
+Reduced power output may result from
+cloud cover, shading, or dirty panels.
+</p>
+
+</div>
+
+<div style="
+padding:15px;
+background:#ffecec;
+border-left:5px solid #c40000;
+border-radius:10px;
+">
+
+<strong>
+Thermal Warning
+</strong>
+
+<p style="
+margin-top:8px;
+color:#666;
+line-height:1.6;
+">
+Excessive temperature may lower
+panel efficiency and lifespan.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Generation Status Overview
+</h3>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:18px;
+">
+
+<div>
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+">
+
+<span>Active</span>
+
+<span>
+<%= readings.filter(
+r => r.status === 'active'
+).length %>
+</span>
+
+</div>
+
+<div style="
+height:10px;
+background:#f1f1f1;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:
+<%= readings.length
+? (
+readings.filter(
+r => r.status === 'active'
+).length / readings.length
+) * 100
+: 0 %>%;
+background:#0c5f2c;
+">
+
+</div>
+
+</div>
+
+</div>
+
+<div>
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+">
+
+<span>Low</span>
+
+<span>
+<%= readings.filter(
+r => r.status === 'low'
+).length %>
+</span>
+
+</div>
+
+<div style="
+height:10px;
+background:#f1f1f1;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:
+<%= readings.length
+? (
+readings.filter(
+r => r.status === 'low'
+).length / readings.length
+) * 100
+: 0 %>%;
+background:#d4a017;
+">
+
+</div>
+
+</div>
+
+</div>
+
+<div>
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+">
+
+<span>Fault</span>
+
+<span>
+<%= readings.filter(
+r => r.status === 'fault'
+).length %>
+</span>
+
+</div>
+
+<div style="
+height:10px;
+background:#f1f1f1;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:
+<%= readings.length
+? (
+readings.filter(
+r => r.status === 'fault'
+).length / readings.length
+) * 100
+: 0 %>%;
+background:#c40000;
+">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
