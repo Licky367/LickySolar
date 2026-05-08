@@ -1,0 +1,165 @@
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+System Administrators
+</h3>
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:15px;
+">
+
+<div>
+
+<p style="color:#666;">
+Manage all administrators within the platform.
+</p>
+
+</div>
+
+<% if(currentUser.role === "super_admin"){ %>
+
+<a
+href="/admin/invite-admin"
+class="btn btn-green"
+>
+
+<i class="fas fa-user-plus"></i>
+Invite Admin
+
+</a>
+
+<% } %>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>Name</th>
+
+<th>Email</th>
+
+<th>Phone</th>
+
+<th>Role</th>
+
+<th>Status</th>
+
+<th>Joined</th>
+
+</tr>
+
+<% admins.forEach(admin => { %>
+
+<tr>
+
+<td>
+
+<div style="
+display:flex;
+align-items:center;
+gap:10px;
+">
+
+<div style="
+width:40px;
+height:40px;
+border-radius:50%;
+background:#0c5f2c;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+">
+
+<%= admin.name.charAt(0).toUpperCase() %>
+
+</div>
+
+<div>
+<%= admin.name %>
+</div>
+
+</div>
+
+</td>
+
+<td>
+<%= admin.email %>
+</td>
+
+<td>
+<%= admin.phone %>
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+background:
+<%= admin.role === 'super_admin'
+? '#ffe9b3'
+: '#e7fff0'
+%>;
+color:
+<%= admin.role === 'super_admin'
+? '#946200'
+: '#0c5f2c'
+%>;
+">
+
+<%= admin.role %>
+
+</span>
+
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+background:
+<%= admin.active
+? '#e7fff0'
+: '#ffe5e5'
+%>;
+color:
+<%= admin.active
+? '#0c5f2c'
+: '#c40000'
+%>;
+">
+
+<%= admin.active
+? 'Active'
+: 'Disabled'
+%>
+
+</span>
+
+</td>
+
+<td>
+<%= admin.createdAt.toDateString() %>
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
