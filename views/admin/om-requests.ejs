@@ -1,0 +1,82 @@
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+O&M Requests
+</h3>
+
+<table>
+
+<tr>
+<th>Client</th>
+<th>Issue</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+<% requests.forEach(request => { %>
+
+<tr>
+
+<td>
+<%= request.clientId?.name %>
+</td>
+
+<td>
+<%= request.title %>
+</td>
+
+<td>
+<%= request.status %>
+</td>
+
+<td>
+
+<form
+action="/om/admin/om/<%= request._id %>"
+method="POST"
+>
+
+<select
+name="status"
+class="form-control"
+>
+
+<option value="pending">
+Pending
+</option>
+
+<option value="in_progress">
+In Progress
+</option>
+
+<option value="resolved">
+Resolved
+</option>
+
+</select>
+
+<br>
+
+<textarea
+name="adminResponse"
+class="form-control"
+placeholder="Admin response"
+></textarea>
+
+<br>
+
+<button class="btn btn-green">
+Update
+</button>
+
+</form>
+
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
