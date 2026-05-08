@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title><%= title || "Hybrid Solar Monitoring" %></title>
+
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f7fb;
+    color:#222;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.layout{
+    display:flex;
+    min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    width:260px;
+    background:#0c5f2c;
+    color:white;
+    padding:20px;
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    overflow-y:auto;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:30px;
+}
+
+.logo span{
+    color:#8fffb1;
+}
+
+.nav-links{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:white;
+    padding:14px;
+    border-radius:12px;
+    transition:.3s;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.nav-links a:hover{
+    background:rgba(255,255,255,.15);
+}
+
+.nav-links a.active{
+    background:white;
+    color:#0c5f2c;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+    flex:1;
+    margin-left:260px;
+    padding:25px;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar{
+    background:white;
+    padding:18px 25px;
+    border-radius:18px;
+    margin-bottom:25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 5px 20px rgba(0,0,0,.05);
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.badge{
+    background:#e9fff0;
+    color:#0c5f2c;
+    padding:8px 14px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+/* =========================
+   ALERTS
+========================= */
+
+.alert{
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+
+.alert-success{
+    background:#dfffe7;
+    color:#0c5f2c;
+}
+
+.alert-error{
+    background:#ffe5e5;
+    color:#c40000;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:white;
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 6px 20px rgba(0,0,0,.05);
+}
+
+.card-title{
+    color:#666;
+    margin-bottom:10px;
+    font-size:14px;
+}
+
+.card-value{
+    font-size:32px;
+    font-weight:bold;
+    color:#0c5f2c;
+}
+
+/* =========================
+   TABLES
+========================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table th,
+table td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+table th{
+    background:#f7faf9;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn{
+    border:none;
+    padding:12px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.btn-green{
+    background:#0c5f2c;
+    color:white;
+}
+
+.btn-red{
+    background:#d80000;
+    color:white;
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+}
+
+.form-control{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid #ddd;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:100%;
+        position:relative;
+        height:auto;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .layout{
+        flex-direction:column;
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="layout">
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+
+<div class="sidebar">
+
+<div class="logo">
+Solar<span>Watch</span>
+</div>
+
+<div class="nav-links">
+
+<% if(currentUser){ %>
+
+    <% if(currentUser.role === "client"){ %>
+
+        <a href="/">
+            <i class="fas fa-chart-line"></i>
+            Dashboard
+        </a>
+
+        <a href="/solar/history">
+            <i class="fas fa-solar-panel"></i>
+            Solar
+        </a>
+
+        <a href="/battery/history">
+            <i class="fas fa-battery-three-quarters"></i>
+            Battery
+        </a>
+
+        <a href="/faults">
+            <i class="fas fa-triangle-exclamation"></i>
+            Faults
+        </a>
+
+        <a href="/om/request">
+            <i class="fas fa-screwdriver-wrench"></i>
+            Request O&M
+        </a>
+
+        <a href="/om/history">
+            <i class="fas fa-clock-rotate-left"></i>
+            O&M History
+        </a>
+
+    <% } %>
+
+    <% if(
+        currentUser.role === "admin" ||
+        currentUser.role === "super_admin"
+    ){ %>
+
+        <a href="/admin">
+            <i class="fas fa-chart-pie"></i>
+            Dashboard
+        </a>
+
+        <a href="/admin/clients">
+            <i class="fas fa-users"></i>
+            Clients
+        </a>
+
+        <a href="/om/admin/om">
+            <i class="fas fa-screwdriver-wrench"></i>
+            O&M Requests
+        </a>
+
+        <a href="/admin/admins">
+            <i class="fas fa-user-shield"></i>
+            Admins
+        </a>
+
+        <% if(currentUser.role === "super_admin"){ %>
+
+            <a href="/admin/invite-admin">
+                <i class="fas fa-user-plus"></i>
+                Invite Admin
+            </a>
+
+        <% } %>
+
+    <% } %>
+
+    <a href="/logout">
+        <i class="fas fa-right-from-bracket"></i>
+        Logout
+    </a>
+
+<% } %>
+
+</div>
+
+</div>
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<div class="main">
+
+<div class="topbar">
+
+<div>
+<h2><%= title %></h2>
+</div>
+
+<div class="topbar-right">
+
+<% if(currentUser){ %>
+
+<div class="badge">
+<%= currentUser.role %>
+</div>
+
+<div>
+<%= currentUser.name %>
+</div>
+
+<% } %>
+
+</div>
+
+</div>
+
+<!-- =========================
+     ALERTS
+========================= -->
+
+<% if(success.length > 0){ %>
+
+<div class="alert alert-success">
+<%= success %>
+</div>
+
+<% } %>
+
+<% if(error.length > 0){ %>
+
+<div class="alert alert-error">
+<%= error %>
+</div>
+
+<% } %>
+
+<!-- =========================
+     BODY
+========================= -->
+
+<%- body %>
+
+</div>
+
+</div>
+
+</body>
+</html>
