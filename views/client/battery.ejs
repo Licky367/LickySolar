@@ -1,3 +1,130 @@
+<style>
+
+/* =========================
+   GRID LAYOUT
+========================= */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:20px;
+    width:100%;
+}
+
+/* =========================
+   CARD
+========================= */
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    overflow:hidden;
+}
+
+/* =========================
+   CARD TEXT
+========================= */
+.card-title{
+    font-size:16px;
+    color:#666;
+    margin-bottom:12px;
+}
+
+.card-value{
+    font-size:32px;
+    font-weight:bold;
+    color:#111;
+}
+
+/* =========================
+   BADGE
+========================= */
+.badge{
+    padding:10px 16px;
+    background:#f4f4f4;
+    border-radius:30px;
+    font-weight:600;
+    font-size:14px;
+}
+
+/* =========================
+   TABLE WRAPPER
+========================= */
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+/* Scrollbar */
+.table-wrapper::-webkit-scrollbar{
+    height:8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb{
+    background:#ccc;
+    border-radius:20px;
+}
+
+/* =========================
+   TABLE
+========================= */
+table{
+    width:100%;
+    min-width:950px;
+    border-collapse:collapse;
+}
+
+th{
+    background:#f8f8f8;
+    padding:15px;
+    text-align:left;
+    font-size:14px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    white-space:nowrap;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media(max-width:768px){
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .card{
+        padding:16px;
+    }
+
+    .card-value{
+        font-size:26px;
+    }
+
+    h2{
+        font-size:22px;
+    }
+
+    h3{
+        font-size:18px;
+    }
+
+    th, td{
+        padding:12px;
+        font-size:14px;
+    }
+
+}
+
+</style>
+
+
 <div class="grid">
 
 <!-- =========================
@@ -25,6 +152,7 @@ overflow:hidden;
 <div style="
 height:100%;
 width:<%= readings[0]?.percentage || 0 %>%;
+
 background:
 <%= (readings[0]?.percentage || 0) > 60
 ? '#0c5f2c'
@@ -32,6 +160,7 @@ background:
 ? '#d4a017'
 : '#d80000'
 %>;
+
 border-radius:20px;
 transition:.4s;
 ">
@@ -100,6 +229,7 @@ Battery Status
 
 <div class="card-value" style="
 font-size:22px;
+text-transform:capitalize;
 ">
 
 <%= readings[0]?.status || 'idle' %>
@@ -141,6 +271,7 @@ gap:15px;
 width:65px;
 height:65px;
 border-radius:16px;
+
 background:
 <%= readings[0]?.health === 'good'
 ? '#e7fff0'
@@ -274,6 +405,8 @@ Historical battery readings and diagnostics
 
 </div>
 
+<div class="table-wrapper">
+
 <table>
 
 <tr>
@@ -381,7 +514,15 @@ color:
 </td>
 
 <td>
+
+<div>
 <%= reading.createdAt.toDateString() %>
+</div>
+
+<small style="color:#777;">
+<%= reading.createdAt.toLocaleTimeString() %>
+</small>
+
 </td>
 
 </tr>
@@ -389,5 +530,7 @@ color:
 <% }) %>
 
 </table>
+
+</div>
 
 </div>
