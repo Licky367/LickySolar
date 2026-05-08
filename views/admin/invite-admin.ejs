@@ -1,0 +1,132 @@
+<div
+style="
+max-width:700px;
+margin:auto;
+"
+>
+
+<div class="card">
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:25px;
+">
+
+<div style="
+width:60px;
+height:60px;
+border-radius:16px;
+background:#e7fff0;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+color:#0c5f2c;
+">
+
+<i class="fas fa-user-shield"></i>
+
+</div>
+
+<div>
+
+<h2>
+Invite New Admin
+</h2>
+
+<p style="
+color:#666;
+margin-top:6px;
+">
+Only super administrators can invite admins.
+</p>
+
+</div>
+
+</div>
+
+<form
+action="/admin/invite-admin"
+method="POST"
+>
+
+<div class="form-group">
+
+<label>
+Admin Email
+</label>
+
+<input
+type="email"
+name="email"
+class="form-control"
+placeholder="Enter admin email"
+required
+/>
+
+</div>
+
+<div style="
+background:#f7faf9;
+padding:18px;
+border-radius:14px;
+margin-bottom:25px;
+border-left:5px solid #0c5f2c;
+">
+
+<h4 style="
+margin-bottom:10px;
+color:#0c5f2c;
+">
+How It Works
+</h4>
+
+<p style="
+line-height:1.7;
+color:#555;
+">
+
+When this email is added into the system,
+the next signup using this email will
+automatically receive the
+<strong>admin</strong> role.
+
+</p>
+
+</div>
+
+<div style="
+display:flex;
+gap:15px;
+flex-wrap:wrap;
+">
+
+<button class="btn btn-green">
+
+<i class="fas fa-paper-plane"></i>
+Invite Admin
+
+</button>
+
+<a
+href="/admin/admins"
+class="btn"
+style="
+background:#eee;
+color:#333;
+"
+>
+
+Cancel
+
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
