@@ -1,0 +1,393 @@
+<div class="grid">
+
+<!-- =========================
+     BATTERY PERCENTAGE
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Battery Level
+</div>
+
+<div class="card-value">
+<%= readings[0]?.percentage || 0 %>%
+</div>
+
+<div style="
+margin-top:18px;
+background:#edf2f7;
+height:14px;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div style="
+height:100%;
+width:<%= readings[0]?.percentage || 0 %>%;
+background:
+<%= (readings[0]?.percentage || 0) > 60
+? '#0c5f2c'
+: (readings[0]?.percentage || 0) > 30
+? '#d4a017'
+: '#d80000'
+%>;
+border-radius:20px;
+transition:.4s;
+">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =========================
+     BATTERY VOLTAGE
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Battery Voltage
+</div>
+
+<div class="card-value">
+<%= readings[0]?.voltage || 0 %> V
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Live battery voltage monitoring
+</p>
+
+</div>
+
+<!-- =========================
+     CURRENT
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Battery Current
+</div>
+
+<div class="card-value">
+<%= readings[0]?.current || 0 %> A
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Current flowing in battery system
+</p>
+
+</div>
+
+<!-- =========================
+     STATUS
+========================= -->
+
+<div class="card">
+
+<div class="card-title">
+Battery Status
+</div>
+
+<div class="card-value" style="
+font-size:22px;
+">
+
+<%= readings[0]?.status || 'idle' %>
+
+</div>
+
+<p style="
+margin-top:12px;
+color:#666;
+">
+Current operational state
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- =========================
+     HEALTH + TEMPERATURE
+========================= -->
+
+<div class="grid">
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Battery Health
+</h3>
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+">
+
+<div style="
+width:65px;
+height:65px;
+border-radius:16px;
+background:
+<%= readings[0]?.health === 'good'
+? '#e7fff0'
+: readings[0]?.health === 'warning'
+? '#fff5d9'
+: '#ffe5e5'
+%>;
+
+color:
+<%= readings[0]?.health === 'good'
+? '#0c5f2c'
+: readings[0]?.health === 'warning'
+? '#946200'
+: '#c40000'
+%>;
+
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+">
+
+<i class="fas fa-car-battery"></i>
+
+</div>
+
+<div>
+
+<h2 style="
+margin-bottom:8px;
+text-transform:capitalize;
+">
+
+<%= readings[0]?.health || 'Unknown' %>
+
+</h2>
+
+<p style="color:#666;">
+Battery condition analysis
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Temperature
+</h3>
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+">
+
+<div style="
+width:65px;
+height:65px;
+border-radius:16px;
+background:#fff1e6;
+color:#ff6b00;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+">
+
+<i class="fas fa-temperature-high"></i>
+
+</div>
+
+<div>
+
+<h2 style="margin-bottom:8px;">
+
+<%= readings[0]?.temperature || 0 %> °C
+
+</h2>
+
+<p style="color:#666;">
+Battery thermal monitoring
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- =========================
+     BATTERY HISTORY
+========================= -->
+
+<div class="card">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:15px;
+">
+
+<div>
+
+<h3>
+Battery Monitoring History
+</h3>
+
+<p style="
+margin-top:5px;
+color:#666;
+">
+Historical battery readings and diagnostics
+</p>
+
+</div>
+
+<div class="badge">
+<%= readings.length %> Records
+</div>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>Voltage</th>
+
+<th>Current</th>
+
+<th>Battery %</th>
+
+<th>Status</th>
+
+<th>Health</th>
+
+<th>Temperature</th>
+
+<th>Date</th>
+
+</tr>
+
+<% readings.forEach(reading => { %>
+
+<tr>
+
+<td>
+<%= reading.voltage %> V
+</td>
+
+<td>
+<%= reading.current %> A
+</td>
+
+<td>
+<%= reading.percentage %>%
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= reading.status === 'charging'
+? '#e7fff0'
+: reading.status === 'discharging'
+? '#fff5d9'
+: reading.status === 'fault'
+? '#ffe5e5'
+: '#edf2f7'
+%>;
+
+color:
+<%= reading.status === 'charging'
+? '#0c5f2c'
+: reading.status === 'discharging'
+? '#946200'
+: reading.status === 'fault'
+? '#c40000'
+: '#555'
+%>;
+">
+
+<%= reading.status %>
+
+</span>
+
+</td>
+
+<td>
+
+<span style="
+padding:8px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= reading.health === 'good'
+? '#e7fff0'
+: reading.health === 'warning'
+? '#fff5d9'
+: '#ffe5e5'
+%>;
+
+color:
+<%= reading.health === 'good'
+? '#0c5f2c'
+: reading.health === 'warning'
+? '#946200'
+: '#c40000'
+%>;
+">
+
+<%= reading.health %>
+
+</span>
+
+</td>
+
+<td>
+<%= reading.temperature %> °C
+</td>
+
+<td>
+<%= reading.createdAt.toDateString() %>
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
