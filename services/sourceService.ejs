@@ -1,0 +1,56 @@
+const SourceTransition =
+require("../modules/SourceTransition");
+
+const DeviceStatus =
+require("../modules/DeviceStatus");
+
+
+// =========================
+// GET CURRENT SOURCE
+// =========================
+
+exports.getCurrentSource = async(clientId)=>{
+
+    const device =
+    await DeviceStatus.findOne({ clientId });
+
+    return device?.activeSource || "unknown";
+};
+
+
+
+// =========================
+// GET TRANSITIONS
+// =========================
+
+exports.getTransitions = async(
+    clientId,
+    filter = null,
+    limit = 50
+)=>{
+
+    let query = { clientId };
+
+    if(filter){
+        query.$or = [
+            { fromSource: filter },
+            { toSource: filter }
+        ];
+    }
+
+    return await SourceTransition
+    .find(query)
+    .sort({ createdAt:-1 })
+    .limit(limit);
+};
+
+
+
+// =========================
+// CREATE TRANSITION (AUTO LOG)
+// =========================
+
+exports.logTransition = async(data)=>{
+
+    return await SourceTransition.create(data);
+};
