@@ -1,16 +1,162 @@
+<style>
+
+/* =========================
+   CARD
+========================= */
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    overflow:hidden;
+}
+
+/* =========================
+   BUTTON
+========================= */
+.btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 16px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+    transition:.3s;
+}
+
+.btn-green{
+    background:#0c5f2c;
+    color:white;
+}
+
+.btn-green:hover{
+    opacity:.9;
+}
+
+/* =========================
+   FORM CONTROL
+========================= */
+.form-control{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+    font-size:14px;
+    background:#fff;
+    box-sizing:border-box;
+}
+
+textarea.form-control{
+    min-height:100px;
+    resize:vertical;
+    font-family:inherit;
+}
+
+/* =========================
+   STATUS BADGES
+========================= */
+.status-badge{
+    padding:8px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+    display:inline-block;
+    text-transform:capitalize;
+}
+
+/* =========================
+   TABLE WRAPPER
+========================= */
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+/* Scrollbar */
+.table-wrapper::-webkit-scrollbar{
+    height:8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb{
+    background:#ccc;
+    border-radius:20px;
+}
+
+/* =========================
+   TABLE
+========================= */
+table{
+    width:100%;
+    min-width:1100px;
+    border-collapse:collapse;
+}
+
+th{
+    background:#f8f8f8;
+    padding:15px;
+    text-align:left;
+    font-size:14px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    vertical-align:top;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media(max-width:768px){
+
+    .card{
+        padding:16px;
+    }
+
+    h3{
+        font-size:18px;
+    }
+
+    th, td{
+        padding:12px;
+        font-size:14px;
+    }
+
+    .btn{
+        width:100%;
+    }
+
+}
+
+</style>
+
+
 <div class="card">
 
 <h3 style="margin-bottom:20px;">
 O&M Requests
 </h3>
 
+<div class="table-wrapper">
+
 <table>
 
 <tr>
+
 <th>Client</th>
+
 <th>Issue</th>
+
 <th>Status</th>
+
 <th>Action</th>
+
 </tr>
 
 <% requests.forEach(request => { %>
@@ -18,18 +164,51 @@ O&M Requests
 <tr>
 
 <td>
+
+<strong>
 <%= request.clientId?.name %>
+</strong>
+
 </td>
 
-<td>
+<td style="
+min-width:220px;
+line-height:1.6;
+">
+
 <%= request.title %>
+
 </td>
 
 <td>
-<%= request.status %>
+
+<span class="status-badge" style="
+
+background:
+<%= request.status === 'resolved'
+? '#e7fff0'
+: request.status === 'in_progress'
+? '#fff5d9'
+: '#edf2f7'
+%>;
+
+color:
+<%= request.status === 'resolved'
+? '#0c5f2c'
+: request.status === 'in_progress'
+? '#946200'
+: '#555'
+%>;
+
+">
+
+<%= request.status.replace('_', ' ') %>
+
+</span>
+
 </td>
 
-<td>
+<td style="min-width:320px;">
 
 <form
 action="/om/admin/om/<%= request._id %>"
@@ -41,15 +220,24 @@ name="status"
 class="form-control"
 >
 
-<option value="pending">
+<option
+value="pending"
+<%= request.status === 'pending' ? 'selected' : '' %>
+>
 Pending
 </option>
 
-<option value="in_progress">
+<option
+value="in_progress"
+<%= request.status === 'in_progress' ? 'selected' : '' %>
+>
 In Progress
 </option>
 
-<option value="resolved">
+<option
+value="resolved"
+<%= request.status === 'resolved' ? 'selected' : '' %>
+>
 Resolved
 </option>
 
@@ -61,12 +249,14 @@ Resolved
 name="adminResponse"
 class="form-control"
 placeholder="Admin response"
-></textarea>
+><%= request.adminResponse || '' %></textarea>
 
 <br>
 
 <button class="btn btn-green">
+
 Update
+
 </button>
 
 </form>
@@ -78,5 +268,7 @@ Update
 <% }) %>
 
 </table>
+
+</div>
 
 </div>
