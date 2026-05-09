@@ -1,0 +1,95 @@
+<div class="grid">
+
+<!-- CURRENT SOURCE -->
+<div class="card">
+
+<div class="card-title">
+Current Power Source
+</div>
+
+<div class="card-value" style="text-transform:capitalize;">
+<%= currentSource %>
+</div>
+
+<p style="color:#666; margin-top:10px;">
+Active energy source supplying your system
+</p>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- FILTERS -->
+<div class="card">
+
+<h3>Filter Transitions</h3>
+
+<div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+
+<a href="/source" class="badge">All</a>
+
+<a href="/source?source=solar" class="badge">Solar</a>
+
+<a href="/source?source=battery" class="badge">Battery</a>
+
+<a href="/source?source=grid" class="badge">Grid</a>
+
+</div>
+
+</div>
+
+<br>
+
+<!-- TRANSITIONS -->
+<div class="card">
+
+<h3>Source Transition History</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<tr>
+<th>From</th>
+<th>To</th>
+<th>Reason</th>
+<th>Solar V</th>
+<th>Battery V</th>
+<th>Grid V</th>
+<th>Load</th>
+<th>Date</th>
+</tr>
+
+<% (transitions || []).forEach(t => { %>
+
+<tr>
+
+<td><%= t.fromSource %></td>
+
+<td><%= t.toSource %></td>
+
+<td><%= t.reason %></td>
+
+<td><%= t.solarVoltage %> V</td>
+
+<td><%= t.batteryVoltage %> V</td>
+
+<td><%= t.gridVoltage %> V</td>
+
+<td><%= t.loadPower %> W</td>
+
+<td>
+<%= new Date(t.createdAt).toLocaleString() %>
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
+
+</div>
