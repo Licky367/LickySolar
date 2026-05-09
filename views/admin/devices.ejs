@@ -1,0 +1,57 @@
+<div class="card">
+
+<div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+
+<h3>Devices</h3>
+
+<div>
+
+<a href="/admin/devices/create" class="btn btn-green">
+Create Device
+</a>
+
+<a href="/admin/devices/assign" class="btn btn-green">
+Assign Device
+</a>
+
+</div>
+
+</div>
+
+<table>
+
+<tr>
+<th>Device ID</th>
+<th>Name</th>
+<th>Client</th>
+<th>Status</th>
+<th>API Key</th>
+</tr>
+
+<% devices.forEach(d => { %>
+
+<tr>
+
+<td><%= d.deviceId %></td>
+
+<td><%= d.name %></td>
+
+<td>
+<%= d.clientId ? d.clientId.name : "Unassigned" %>
+</td>
+
+<td>
+<%= d.assigned ? "Assigned" : "Free" %>
+</td>
+
+<td style="font-size:12px;">
+<%= d.apiKey %>
+</td>
+
+</tr>
+
+<% }) %>
+
+</table>
+
+</div>
