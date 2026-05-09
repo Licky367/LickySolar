@@ -1,13 +1,52 @@
 const solarService =
 require("../services/solarService");
 
+const DeviceStatus =
+require("../modules/DeviceStatus");
+
+
+// =========================
+// CREATE READING (DEVICE API)
+// =========================
+
 exports.createReading = async(req,res)=>{
 
     try{
 
-        await solarService.createReading(
-            req.body
-        );
+        const {
+            deviceId,
+            apiKey,
+            voltage,
+            current,
+            temperature
+        } = req.body;
+
+
+        // Validate device
+        const device =
+        await DeviceStatus.findOne({
+            deviceId,
+            apiKey
+        });
+
+        if(!device){
+
+            return res.status(401).json({
+                error:"Invalid device credentials"
+            });
+        }
+
+
+        // Create reading linked to client
+        await solarService.createReading({
+
+            clientId: device.clientId,
+
+            voltage,
+            current,
+            temperature
+        });
+
 
         res.json({
             success:true
@@ -15,23 +54,51 @@ exports.createReading = async(req,res)=>{
 
     }catch(error){
 
+        console.error("Solar API Error:", error);
+
         res.status(500).json({
             error:error.message
         });
     }
 };
 
+
+
+// =========================
+// CLIENT SOLAR PAGE
+// =========================
+
 exports.clientSolarPage = async(req,res)=>{
 
-    const readings =
-    await solarService.getHistoryByClient(
-        req.session.user._id
-    );
+    try{
 
-    res.render("client/solar",{
+        const clientId = req.session.user._id;
 
-        title:"Solar Monitoring",
+        const readings =
+        await solarService.getHistoryByClient(
+            clientId
+        );
 
-        readings
-    });
+        const latest =
+        await solarService.getLatestByClient(
+            clientId
+        );
+
+        res.render("client/solar",{
+
+            title:"Solar Monitoring",
+
+            readings,
+
+            latest
+        });
+
+    }catch(error){
+
+        console.error("Solar Page Error:", error);
+
+        req.flash("error","Unable to load solar data");
+
+        res.redirect("/");
+    }
 };
