@@ -19,6 +19,12 @@ function getTodayDateString() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// Ensures startDate never goes below today
+function clampStartToToday(startDate) {
+  const today = getTodayDateString();
+  return startDate < today ? today : startDate;
+}
+
 function getWeekRange(dateStr) {
   const d = new Date(dateStr);
   const day = d.getDay();
@@ -30,10 +36,12 @@ function getWeekRange(dateStr) {
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
-  return {
-    start: monday.toISOString().slice(0, 10),
-    end: sunday.toISOString().slice(0, 10)
-  };
+  let start = monday.toISOString().slice(0, 10);
+  let end = sunday.toISOString().slice(0, 10);
+
+  start = clampStartToToday(start);
+
+  return { start, end };
 }
 
 function getMonthRange(dateStr) {
@@ -44,20 +52,24 @@ function getMonthRange(dateStr) {
   const first = new Date(year, month, 1);
   const last = new Date(year, month + 1, 0);
 
-  return {
-    start: first.toISOString().slice(0, 10),
-    end: last.toISOString().slice(0, 10)
-  };
+  let start = first.toISOString().slice(0, 10);
+  let end = last.toISOString().slice(0, 10);
+
+  start = clampStartToToday(start);
+
+  return { start, end };
 }
 
 function getYearRange(dateStr) {
   const d = new Date(dateStr);
   const year = d.getFullYear();
 
-  return {
-    start: `${year}-01-01`,
-    end: `${year}-12-31`
-  };
+  let start = `${year}-01-01`;
+  let end = `${year}-12-31`;
+
+  start = clampStartToToday(start);
+
+  return { start, end };
 }
 
 async function syncForecastFromNasa(lat, lon, startDate, endDate) {
