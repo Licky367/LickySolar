@@ -17,9 +17,7 @@ exports.clientsPage = async(req,res)=>{
         await adminService.getClients();
 
         res.render("admin/clients",{
-
             title:"Clients",
-
             clients
         });
 
@@ -37,16 +35,12 @@ exports.clientsPage = async(req,res)=>{
 // CLIENT DETAILS PAGE
 // =========================
 
-exports.clientDetailsPage = async(
-    req,
-    res
-)=>{
+exports.clientDetailsPage = async(req,res)=>{
 
     try{
 
         const { id } = req.params;
 
-        // Get client + device
         const {
             client,
             device
@@ -60,18 +54,13 @@ exports.clientDetailsPage = async(
             return res.redirect("/admin/clients");
         }
 
-        // Get dashboard data
         const dashboard =
         await dashboardService.getClientDashboard(id);
 
         res.render("admin/client-details",{
-
             title:"Client Details",
-
             client,
-
             device,
-
             dashboard
         });
 
@@ -97,9 +86,7 @@ exports.adminsPage = async(req,res)=>{
         await adminService.getAdmins();
 
         res.render("admin/admins",{
-
             title:"Admins",
-
             admins
         });
 
@@ -120,7 +107,6 @@ exports.adminsPage = async(req,res)=>{
 exports.getInvitePage = (req,res)=>{
 
     res.render("admin/invite-admin",{
-
         title:"Invite Admin"
     });
 };
@@ -136,9 +122,7 @@ exports.inviteAdmin = async(req,res)=>{
     try{
 
         await adminService.inviteAdmin({
-
             email:req.body.email,
-
             invitedBy:req.session.user._id
         });
 
@@ -160,7 +144,7 @@ exports.inviteAdmin = async(req,res)=>{
 
 
 // =========================
-// DEVICES PAGE
+// DEVICES LIST PAGE
 // =========================
 
 exports.devicesPage = async(req,res)=>{
@@ -171,9 +155,7 @@ exports.devicesPage = async(req,res)=>{
         await adminService.getAllDevices();
 
         res.render("admin/devices",{
-
             title:"Devices",
-
             devices
         });
 
@@ -182,6 +164,46 @@ exports.devicesPage = async(req,res)=>{
         req.flash("error", error.message);
 
         res.redirect("/admin");
+    }
+};
+
+
+
+// =========================
+// CREATE DEVICE PAGE
+// =========================
+
+exports.getCreateDevicePage = (req,res)=>{
+
+    res.render("admin/create-device",{
+        title:"Register Device"
+    });
+};
+
+
+
+// =========================
+// CREATE DEVICE
+// =========================
+
+exports.createDevice = async(req,res)=>{
+
+    try{
+
+        await adminService.createDevice(req.body);
+
+        req.flash(
+            "success",
+            "Device created successfully"
+        );
+
+        res.redirect("/admin/devices");
+
+    }catch(error){
+
+        req.flash("error", error.message);
+
+        res.redirect("/admin/devices/create");
     }
 };
 
@@ -202,11 +224,8 @@ exports.assignDevicePage = async(req,res)=>{
         await adminService.getClients();
 
         res.render("admin/assign-device",{
-
             title:"Assign Device",
-
             devices,
-
             clients
         });
 
@@ -250,5 +269,34 @@ exports.assignDevice = async(req,res)=>{
         req.flash("error", error.message);
 
         res.redirect("/admin/devices/assign");
+    }
+};
+
+
+
+// =========================
+// UNASSIGN DEVICE
+// =========================
+
+exports.unassignDevice = async(req,res)=>{
+
+    try{
+
+        const { deviceId } = req.body;
+
+        await adminService.unassignDevice(deviceId);
+
+        req.flash(
+            "success",
+            "Device unassigned successfully"
+        );
+
+        res.redirect("/admin/devices");
+
+    }catch(error){
+
+        req.flash("error", error.message);
+
+        res.redirect("/admin/devices");
     }
 };
