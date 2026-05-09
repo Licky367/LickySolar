@@ -18,6 +18,16 @@ const gridReadingSchema = new mongoose.Schema({
         default:0
     },
 
+    current:{ // ✅ added
+        type:Number,
+        default:0
+    },
+
+    power:{ // ✅ added
+        type:Number,
+        default:0
+    },
+
     frequency:{
         type:Number,
         default:0
