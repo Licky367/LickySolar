@@ -1,136 +1,6 @@
-<style>
-
-/* =========================
-   GRID LAYOUT
-========================= */
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
-    gap:20px;
-    width:100%;
-}
-
-/* =========================
-   CARD
-========================= */
-.card{
-    background:#fff;
-    padding:20px;
-    border-radius:16px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.05);
-    overflow:hidden;
-}
-
-/* =========================
-   CARD TEXT
-========================= */
-.card-title{
-    font-size:16px;
-    color:#666;
-    margin-bottom:12px;
-}
-
-.card-value{
-    font-size:32px;
-    font-weight:bold;
-    color:#111;
-}
-
-/* =========================
-   BADGE
-========================= */
-.badge{
-    padding:10px 16px;
-    background:#f4f4f4;
-    border-radius:30px;
-    font-weight:600;
-    font-size:14px;
-}
-
-/* =========================
-   TABLE WRAPPER
-========================= */
-.table-wrapper{
-    width:100%;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-/* Scrollbar */
-.table-wrapper::-webkit-scrollbar{
-    height:8px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb{
-    background:#ccc;
-    border-radius:20px;
-}
-
-/* =========================
-   TABLE
-========================= */
-table{
-    width:100%;
-    min-width:950px;
-    border-collapse:collapse;
-}
-
-th{
-    background:#f8f8f8;
-    padding:15px;
-    text-align:left;
-    font-size:14px;
-    font-weight:600;
-    white-space:nowrap;
-}
-
-td{
-    padding:15px;
-    border-bottom:1px solid #eee;
-    white-space:nowrap;
-}
-
-/* =========================
-   MOBILE
-========================= */
-@media(max-width:768px){
-
-    .grid{
-        grid-template-columns:1fr;
-    }
-
-    .card{
-        padding:16px;
-    }
-
-    .card-value{
-        font-size:26px;
-    }
-
-    h2{
-        font-size:22px;
-    }
-
-    h3{
-        font-size:18px;
-    }
-
-    th, td{
-        padding:12px;
-        font-size:14px;
-    }
-
-}
-
-</style>
-
-
 <div class="grid">
 
-<!-- =========================
-     BATTERY PERCENTAGE
-========================= -->
-
+<!-- BATTERY LEVEL -->
 <div class="card">
 
 <div class="card-title">
@@ -138,7 +8,7 @@ Battery Level
 </div>
 
 <div class="card-value">
-<%= readings[0]?.percentage || 0 %>%
+<%= latest?.percentage || 0 %>%
 </div>
 
 <div style="
@@ -151,12 +21,12 @@ overflow:hidden;
 
 <div style="
 height:100%;
-width:<%= readings[0]?.percentage || 0 %>%;
+width:<%= latest?.percentage || 0 %>%;
 
 background:
-<%= (readings[0]?.percentage || 0) > 60
+<%= (latest?.percentage || 0) > 60
 ? '#0c5f2c'
-: (readings[0]?.percentage || 0) > 30
+: (latest?.percentage || 0) > 30
 ? '#d4a017'
 : '#d80000'
 %>;
@@ -171,10 +41,8 @@ transition:.4s;
 
 </div>
 
-<!-- =========================
-     BATTERY VOLTAGE
-========================= -->
 
+<!-- VOLTAGE -->
 <div class="card">
 
 <div class="card-title">
@@ -182,22 +50,13 @@ Battery Voltage
 </div>
 
 <div class="card-value">
-<%= readings[0]?.voltage || 0 %> V
+<%= latest?.voltage || 0 %> V
 </div>
-
-<p style="
-margin-top:12px;
-color:#666;
-">
-Live battery voltage monitoring
-</p>
 
 </div>
 
-<!-- =========================
-     CURRENT
-========================= -->
 
+<!-- CURRENT -->
 <div class="card">
 
 <div class="card-title">
@@ -205,22 +64,13 @@ Battery Current
 </div>
 
 <div class="card-value">
-<%= readings[0]?.current || 0 %> A
+<%= latest?.current || 0 %> A
 </div>
-
-<p style="
-margin-top:12px;
-color:#666;
-">
-Current flowing in battery system
-</p>
 
 </div>
 
-<!-- =========================
-     STATUS
-========================= -->
 
+<!-- STATUS -->
 <div class="card">
 
 <div class="card-title">
@@ -232,16 +82,9 @@ font-size:22px;
 text-transform:capitalize;
 ">
 
-<%= readings[0]?.status || 'idle' %>
+<%= latest?.status || 'idle' %>
 
 </div>
-
-<p style="
-margin-top:12px;
-color:#666;
-">
-Current operational state
-</p>
 
 </div>
 
@@ -249,119 +92,26 @@ Current operational state
 
 <br>
 
-<!-- =========================
-     HEALTH + TEMPERATURE
-========================= -->
-
+<!-- HEALTH + TEMP -->
 <div class="grid">
 
 <div class="card">
 
-<h3 style="margin-bottom:20px;">
-Battery Health
-</h3>
+<h3>Battery Health</h3>
 
-<div style="
-display:flex;
-align-items:center;
-gap:15px;
-">
-
-<div style="
-width:65px;
-height:65px;
-border-radius:16px;
-
-background:
-<%= readings[0]?.health === 'good'
-? '#e7fff0'
-: readings[0]?.health === 'warning'
-? '#fff5d9'
-: '#ffe5e5'
-%>;
-
-color:
-<%= readings[0]?.health === 'good'
-? '#0c5f2c'
-: readings[0]?.health === 'warning'
-? '#946200'
-: '#c40000'
-%>;
-
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-">
-
-<i class="fas fa-car-battery"></i>
-
-</div>
-
-<div>
-
-<h2 style="
-margin-bottom:8px;
-text-transform:capitalize;
-">
-
-<%= readings[0]?.health || 'Unknown' %>
-
+<h2 style="text-transform:capitalize;">
+<%= latest?.health || 'Unknown' %>
 </h2>
-
-<p style="color:#666;">
-Battery condition analysis
-</p>
-
-</div>
-
-</div>
 
 </div>
 
 <div class="card">
 
-<h3 style="margin-bottom:20px;">
-Temperature
-</h3>
+<h3>Temperature</h3>
 
-<div style="
-display:flex;
-align-items:center;
-gap:15px;
-">
-
-<div style="
-width:65px;
-height:65px;
-border-radius:16px;
-background:#fff1e6;
-color:#ff6b00;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-">
-
-<i class="fas fa-temperature-high"></i>
-
-</div>
-
-<div>
-
-<h2 style="margin-bottom:8px;">
-
-<%= readings[0]?.temperature || 0 %> °C
-
+<h2>
+<%= latest?.temperature || 0 %> °C
 </h2>
-
-<p style="color:#666;">
-Battery thermal monitoring
-</p>
-
-</div>
-
-</div>
 
 </div>
 
@@ -369,161 +119,36 @@ Battery thermal monitoring
 
 <br>
 
-<!-- =========================
-     BATTERY HISTORY
-========================= -->
-
+<!-- HISTORY -->
 <div class="card">
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-flex-wrap:wrap;
-gap:15px;
-">
-
-<div>
-
-<h3>
-Battery Monitoring History
-</h3>
-
-<p style="
-margin-top:5px;
-color:#666;
-">
-Historical battery readings and diagnostics
-</p>
-
-</div>
-
-<div class="badge">
-<%= readings.length %> Records
-</div>
-
-</div>
+<h3>Battery History</h3>
 
 <div class="table-wrapper">
 
 <table>
 
 <tr>
-
 <th>Voltage</th>
-
 <th>Current</th>
-
 <th>Battery %</th>
-
 <th>Status</th>
-
 <th>Health</th>
-
-<th>Temperature</th>
-
+<th>Temp</th>
 <th>Date</th>
-
 </tr>
 
-<% readings.forEach(reading => { %>
+<% (readings || []).forEach(r => { %>
 
 <tr>
 
-<td>
-<%= reading.voltage %> V
-</td>
-
-<td>
-<%= reading.current %> A
-</td>
-
-<td>
-<%= reading.percentage %>%
-</td>
-
-<td>
-
-<span style="
-padding:8px 12px;
-border-radius:20px;
-font-size:12px;
-font-weight:bold;
-
-background:
-<%= reading.status === 'charging'
-? '#e7fff0'
-: reading.status === 'discharging'
-? '#fff5d9'
-: reading.status === 'fault'
-? '#ffe5e5'
-: '#edf2f7'
-%>;
-
-color:
-<%= reading.status === 'charging'
-? '#0c5f2c'
-: reading.status === 'discharging'
-? '#946200'
-: reading.status === 'fault'
-? '#c40000'
-: '#555'
-%>;
-">
-
-<%= reading.status %>
-
-</span>
-
-</td>
-
-<td>
-
-<span style="
-padding:8px 12px;
-border-radius:20px;
-font-size:12px;
-font-weight:bold;
-
-background:
-<%= reading.health === 'good'
-? '#e7fff0'
-: reading.health === 'warning'
-? '#fff5d9'
-: '#ffe5e5'
-%>;
-
-color:
-<%= reading.health === 'good'
-? '#0c5f2c'
-: reading.health === 'warning'
-? '#946200'
-: '#c40000'
-%>;
-">
-
-<%= reading.health %>
-
-</span>
-
-</td>
-
-<td>
-<%= reading.temperature %> °C
-</td>
-
-<td>
-
-<div>
-<%= reading.createdAt.toDateString() %>
-</div>
-
-<small style="color:#777;">
-<%= reading.createdAt.toLocaleTimeString() %>
-</small>
-
-</td>
+<td><%= r.voltage %> V</td>
+<td><%= r.current %> A</td>
+<td><%= r.percentage %>%</td>
+<td><%= r.status %></td>
+<td><%= r.health %></td>
+<td><%= r.temperature %> °C</td>
+<td><%= new Date(r.createdAt).toLocaleString() %></td>
 
 </tr>
 
@@ -531,6 +156,33 @@ color:
 
 </table>
 
+</div>
+
+</div>
+
+<br>
+
+<!-- STATS -->
+<div class="grid">
+
+<div class="card">
+<h3>Charging</h3>
+<p><%= stats.charging %></p>
+</div>
+
+<div class="card">
+<h3>Discharging</h3>
+<p><%= stats.discharging %></p>
+</div>
+
+<div class="card">
+<h3>Idle</h3>
+<p><%= stats.idle %></p>
+</div>
+
+<div class="card">
+<h3>Fault</h3>
+<p><%= stats.fault %></p>
 </div>
 
 </div>
