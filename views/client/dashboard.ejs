@@ -1,57 +1,42 @@
 <div class="grid">
 
+<!-- SOLAR -->
 <div class="card">
-
-<div class="card-title">
-Solar Power
+    <div class="card-title">Solar Power</div>
+    <div class="card-value">
+        <%= dashboard.solar?.power || 0 %> W
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.solar?.power || 0 %> W
-</div>
-
-</div>
-
+<!-- BATTERY -->
 <div class="card">
-
-<div class="card-title">
-Battery
+    <div class="card-title">Battery</div>
+    <div class="card-value">
+        <%= dashboard.battery?.percentage || 0 %>%
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.battery?.percentage || 0 %>%
-</div>
-
-</div>
-
+<!-- CURRENT SOURCE -->
 <div class="card">
-
-<div class="card-title">
-Current Source
+    <div class="card-title">Current Source</div>
+    <div class="card-value">
+        <%= device?.activeSource || 'N/A' %>
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.deviceStatus?.activeSource || 'N/A' %>
-</div>
-
-</div>
-
+<!-- FAULT COUNT -->
 <div class="card">
-
-<div class="card-title">
-Faults
-</div>
-
-<div class="card-value">
-<%= data.faults.length %>
-</div>
-
+    <div class="card-title">Faults</div>
+    <div class="card-value">
+        <%= dashboard.faults?.length || 0 %>
+    </div>
 </div>
 
 </div>
 
 <br>
 
+<!-- SYSTEM STATUS -->
 <div class="card">
 
 <h3 style="margin-bottom:20px;">
@@ -61,45 +46,65 @@ System Status
 <table>
 
 <tr>
-<th>Component</th>
-<th>Status</th>
+    <th>Component</th>
+    <th>Status</th>
 </tr>
 
 <tr>
-<td>Solar</td>
-<td>
-<%= data.deviceStatus?.solarActive
-? 'Active'
-: 'Offline'
-%>
-</td>
+    <td>Solar</td>
+    <td>
+        <%= device?.solarActive
+            ? 'Active'
+            : 'Offline'
+        %>
+    </td>
 </tr>
 
 <tr>
-<td>Battery</td>
-<td>
-<%= data.deviceStatus?.batteryActive
-? 'Active'
-: 'Offline'
-%>
-</td>
+    <td>Battery</td>
+    <td>
+        <%= device?.batteryActive
+            ? 'Active'
+            : 'Offline'
+        %>
+    </td>
 </tr>
 
 <tr>
-<td>Grid</td>
-<td>
-<%= data.deviceStatus?.gridActive
-? 'Available'
-: 'Unavailable'
-%>
-</td>
+    <td>Grid</td>
+    <td>
+        <%= device?.gridActive
+            ? 'Available'
+            : 'Unavailable'
+        %>
+    </td>
 </tr>
 
 <tr>
-<td>Inverter</td>
-<td>
-<%= data.deviceStatus?.inverterStatus %>
-</td>
+    <td>Inverter</td>
+    <td>
+        <%= device?.inverterStatus || 'Unknown' %>
+    </td>
+</tr>
+
+<tr>
+    <td>Internet</td>
+    <td>
+        <%= device?.internetStatus === 'online'
+            ? '🟢 Online'
+            : '🔴 Offline'
+        %>
+    </td>
+</tr>
+
+<tr>
+    <td>Last Update</td>
+    <td>
+        <%= device?.lastHeartbeat
+            ? new Date(device.lastHeartbeat).toLocaleString()
+            : 'N/A'
+        %>
+    </td>
 </tr>
 
 </table>
