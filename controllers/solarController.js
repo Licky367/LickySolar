@@ -21,7 +21,6 @@ exports.createReading = async(req,res)=>{
             temperature
         } = req.body;
 
-
         // Validate device
         const device =
         await DeviceStatus.findOne({
@@ -36,17 +35,13 @@ exports.createReading = async(req,res)=>{
             });
         }
 
-
-        // Create reading linked to client
+        // Save reading
         await solarService.createReading({
-
             clientId: device.clientId,
-
             voltage,
             current,
             temperature
         });
-
 
         res.json({
             success:true
@@ -75,14 +70,20 @@ exports.clientSolarPage = async(req,res)=>{
         const clientId = req.session.user._id;
 
         const readings =
-        await solarService.getHistoryByClient(
-            clientId
-        );
+        await solarService.getHistoryByClient(clientId);
 
         const latest =
-        await solarService.getLatestByClient(
-            clientId
-        );
+        await solarService.getLatestByClient(clientId);
+
+        // Stats (move logic out of EJS)
+        const activeCount =
+        readings.filter(r => r.status === "active").length;
+
+        const lowCount =
+        readings.filter(r => r.status === "low").length;
+
+        const faultCount =
+        readings.filter(r => r.status === "fault").length;
 
         res.render("client/solar",{
 
@@ -90,7 +91,14 @@ exports.clientSolarPage = async(req,res)=>{
 
             readings,
 
-            latest
+            latest,
+
+            stats:{
+                active: activeCount,
+                low: lowCount,
+                fault: faultCount,
+                total: readings.length
+            }
         });
 
     }catch(error){
