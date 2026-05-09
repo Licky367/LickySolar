@@ -5,8 +5,33 @@ const deviceStatusSchema = new mongoose.Schema({
     clientId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
-        required:true,
-        unique:true
+        default:null
+    },
+
+    deviceId:{
+        type:String,
+        unique:true,
+        required:true
+    },
+
+    apiKey:{
+        type:String,
+        required:true
+    },
+
+    name:{
+        type:String,
+        default:"Solar Device"
+    },
+
+    location:{
+        type:String,
+        default:""
+    },
+
+    assigned:{
+        type:Boolean,
+        default:false
     },
 
     solarActive:{
@@ -39,7 +64,7 @@ const deviceStatusSchema = new mongoose.Schema({
     internetStatus:{
         type:String,
         enum:["online","offline"],
-        default:"online"
+        default:"offline"
     },
 
     lastHeartbeat:{
@@ -47,7 +72,7 @@ const deviceStatusSchema = new mongoose.Schema({
         default:Date.now
     },
 
-    updatedAt:{
+    createdAt:{
         type:Date,
         default:Date.now
     }
