@@ -1,0 +1,49 @@
+<div class="card">
+
+<h3>Assign Device to Client</h3>
+
+<form action="/admin/devices/assign" method="POST">
+
+<div class="form-group">
+
+<label>Select Device</label>
+
+<select name="deviceId" class="form-control">
+
+<% devices.forEach(d => { %>
+
+<option value="<%= d.deviceId %>">
+<%= d.deviceId %> - <%= d.name %>
+</option>
+
+<% }) %>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Select Client</label>
+
+<select name="clientId" class="form-control">
+
+<% clients.forEach(c => { %>
+
+<option value="<%= c._id %>">
+<%= c.name %> (<%= c.email %>)
+</option>
+
+<% }) %>
+
+</select>
+
+</div>
+
+<button class="btn btn-green">
+Assign
+</button>
+
+</form>
+
+</div>
