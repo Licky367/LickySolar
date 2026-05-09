@@ -1,51 +1,63 @@
 <div class="grid">
 
+<!-- TOTAL CLIENTS -->
 <div class="card">
-
-<div class="card-title">
-Total Clients
+    <div class="card-title">
+        Total Clients
+    </div>
+    <div class="card-value">
+        <%= dashboard.totalClients || 0 %>
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.totalClients %>
-</div>
-
-</div>
-
+<!-- TOTAL DEVICES -->
 <div class="card">
-
-<div class="card-title">
-Active Systems
+    <div class="card-title">
+        Total Devices
+    </div>
+    <div class="card-value">
+        <%= dashboard.totalDevices || 0 %>
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.activeSystems %>
-</div>
-
-</div>
-
+<!-- ACTIVE SYSTEMS -->
 <div class="card">
-
-<div class="card-title">
-Pending Faults
+    <div class="card-title">
+        Active Systems
+    </div>
+    <div class="card-value">
+        <%= dashboard.activeSystems || 0 %>
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.pendingFaults %>
-</div>
-
-</div>
-
+<!-- OFFLINE SYSTEMS -->
 <div class="card">
-
-<div class="card-title">
-Pending O&M
+    <div class="card-title">
+        Offline Systems
+    </div>
+    <div class="card-value">
+        <%= dashboard.offlineDevices || 0 %>
+    </div>
 </div>
 
-<div class="card-value">
-<%= data.pendingOM %>
+<!-- PENDING FAULTS -->
+<div class="card">
+    <div class="card-title">
+        Pending Faults
+    </div>
+    <div class="card-value">
+        <%= dashboard.pendingFaults || 0 %>
+    </div>
 </div>
 
+<!-- PENDING O&M -->
+<div class="card">
+    <div class="card-title">
+        Pending O&M
+    </div>
+    <div class="card-value">
+        <%= dashboard.pendingOM || 0 %>
+    </div>
 </div>
 
 </div>
