@@ -1,4 +1,4 @@
-const DeviceStatus = require("../modules/DeviceStatus");
+const DeviceStatus = require("../models/DeviceStatus");
 const crypto = require("crypto");
 
 // Generate API key
