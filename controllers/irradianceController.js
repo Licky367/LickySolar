@@ -20,11 +20,17 @@ function normalizeMongoData(data) {
 exports.irradianceDashboard = async (req, res) => {
   try {
     const today = getTodayDateString();
-
     const selectedDate = req.query.date || today;
 
     const latitude = req.query.lat ? Number(req.query.lat) : null;
     const longitude = req.query.lon ? Number(req.query.lon) : null;
+
+    // New: mode & panel area
+    const mode = req.query.mode || "irradiance";
+    const areaInput = req.query.area ? Number(req.query.area) : 0;
+
+    // If invalid area, set to 1
+    const area = areaInput > 0 ? areaInput : 1;
 
     // Default location if user doesn't input
     const defaultLat = -1.28333;
@@ -36,10 +42,12 @@ exports.irradianceDashboard = async (req, res) => {
     // Validate GPS
     if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       return res.render("irradianceDashboard", {
-        title: "Solar Irradiance Forecast",
+        title: "Solar Forecast Dashboard",
         selectedDate: today,
         lat: defaultLat,
         lon: defaultLon,
+        mode,
+        area,
         dayData: [],
         weekData: [],
         monthData: [],
@@ -48,13 +56,32 @@ exports.irradianceDashboard = async (req, res) => {
       });
     }
 
-    // Reject past dates
-    if (selectedDate < today) {
+    // Validate mode
+    if (!["irradiance", "predicted_power"].includes(mode)) {
       return res.render("irradianceDashboard", {
-        title: "Solar Irradiance Forecast",
+        title: "Solar Forecast Dashboard",
         selectedDate: today,
         lat,
         lon,
+        mode: "irradiance",
+        area,
+        dayData: [],
+        weekData: [],
+        monthData: [],
+        yearData: [],
+        error: "Invalid mode selected."
+      });
+    }
+
+    // Reject past dates
+    if (selectedDate < today) {
+      return res.render("irradianceDashboard", {
+        title: "Solar Forecast Dashboard",
+        selectedDate: today,
+        lat,
+        lon,
+        mode,
+        area,
         dayData: [],
         weekData: [],
         monthData: [],
@@ -82,10 +109,12 @@ exports.irradianceDashboard = async (req, res) => {
     const yearData = await getForecastBetween(lat, lon, yearRange.start, yearRange.end);
 
     return res.render("irradianceDashboard", {
-      title: "Solar Irradiance Forecast",
+      title: "Solar Forecast Dashboard",
       selectedDate,
       lat,
       lon,
+      mode,
+      area,
       dayData: normalizeMongoData(dayData),
       weekData: normalizeMongoData(weekData),
       monthData: normalizeMongoData(monthData),
@@ -96,10 +125,12 @@ exports.irradianceDashboard = async (req, res) => {
     console.error("Irradiance Dashboard Error:", err);
 
     return res.render("irradianceDashboard", {
-      title: "Solar Irradiance Forecast",
+      title: "Solar Forecast Dashboard",
       selectedDate: req.query.date || "",
       lat: req.query.lat || "",
       lon: req.query.lon || "",
+      mode: req.query.mode || "irradiance",
+      area: req.query.area || 1,
       dayData: [],
       weekData: [],
       monthData: [],
