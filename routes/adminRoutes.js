@@ -12,39 +12,100 @@ require("../middlewares/adminMiddleware");
 const superAdminMiddleware =
 require("../middlewares/superAdminMiddleware");
 
+
+// =========================
+// APPLY GLOBAL MIDDLEWARES
+// =========================
+
+// All admin routes require login + admin role
+router.use(authMiddleware, adminMiddleware);
+
+
+// =========================
+// CLIENTS
+// =========================
+
 router.get(
     "/clients",
-    authMiddleware,
-    adminMiddleware,
     adminController.clientsPage
 );
 
 router.get(
     "/client/:id",
-    authMiddleware,
-    adminMiddleware,
     adminController.clientDetailsPage
 );
 
+
+// =========================
+// ADMINS
+// =========================
+
 router.get(
     "/admins",
-    authMiddleware,
-    adminMiddleware,
     adminController.adminsPage
 );
 
+
+// =========================
+// INVITE ADMIN (SUPER ADMIN ONLY)
+// =========================
+
 router.get(
     "/invite-admin",
-    authMiddleware,
     superAdminMiddleware,
     adminController.getInvitePage
 );
 
 router.post(
     "/invite-admin",
-    authMiddleware,
     superAdminMiddleware,
     adminController.inviteAdmin
 );
+
+
+// =========================
+// DEVICES
+// =========================
+
+// List devices
+router.get(
+    "/devices",
+    adminController.devicesPage
+);
+
+// Create device
+router.get(
+    "/devices/create",
+    adminController.getCreateDevicePage
+);
+
+router.post(
+    "/devices/create",
+    adminController.createDevice
+);
+
+
+// =========================
+// DEVICE ASSIGNMENT
+// =========================
+
+// Assign page
+router.get(
+    "/devices/assign",
+    adminController.assignDevicePage
+);
+
+// Assign action
+router.post(
+    "/devices/assign",
+    adminController.assignDevice
+);
+
+// Unassign device
+router.post(
+    "/devices/unassign",
+    adminController.unassignDevice
+);
+
 
 module.exports = router;
