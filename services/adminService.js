@@ -2,6 +2,8 @@ const User = require("../modules/User");
 const AdminInvite = require("../modules/AdminInvite");
 const DeviceStatus = require("../modules/DeviceStatus");
 
+const crypto = require("crypto");
+
 
 // =========================
 // CLIENTS
@@ -21,6 +23,8 @@ exports.getClientWithDevice = async(id)=>{
 
     const client = await User.findById(id);
 
+    if(!client) return { client:null, device:null };
+
     const device = await DeviceStatus.findOne({
         clientId:id
     });
@@ -30,6 +34,14 @@ exports.getClientWithDevice = async(id)=>{
         device
     };
 };
+
+
+// Get client basic info
+exports.getClientById = async(id)=>{
+
+    return await User.findById(id);
+};
+
 
 
 // =========================
@@ -55,7 +67,6 @@ exports.isInvitedAdmin = async(email)=>{
 // Invite admin
 exports.inviteAdmin = async(data)=>{
 
-    // Prevent duplicate invites
     const existing = await AdminInvite.findOne({
         email:data.email
     });
@@ -68,22 +79,55 @@ exports.inviteAdmin = async(data)=>{
 };
 
 
+
 // =========================
-// CLIENT DETAILS
+// DEVICE OPERATIONS
 // =========================
 
-// Get client basic info
-exports.getClientById = async(id)=>{
 
-    return await User.findById(id);
+// 🔐 Generate API key
+const generateApiKey = ()=>{
+    return crypto.randomBytes(24).toString("hex");
 };
 
 
 // =========================
-// DEVICE OPERATIONS (ADMIN SIDE)
+// CREATE DEVICE
 // =========================
 
-// Get all devices (for admin dashboard)
+exports.createDevice = async(data)=>{
+
+    const existing = await DeviceStatus.findOne({
+        deviceId:data.deviceId
+    });
+
+    if(existing){
+        throw new Error("Device already exists");
+    }
+
+    const apiKey = generateApiKey();
+
+    const device = await DeviceStatus.create({
+
+        deviceId:data.deviceId,
+
+        name:data.name || "Solar Device",
+
+        location:data.location || "",
+
+        apiKey,
+
+        assigned:false
+    });
+
+    return device;
+};
+
+
+// =========================
+// GET ALL DEVICES
+// =========================
+
 exports.getAllDevices = async()=>{
 
     return await DeviceStatus
@@ -93,7 +137,10 @@ exports.getAllDevices = async()=>{
 };
 
 
-// Get unassigned devices
+// =========================
+// GET UNASSIGNED DEVICES
+// =========================
+
 exports.getUnassignedDevices = async()=>{
 
     return await DeviceStatus.find({
@@ -102,7 +149,22 @@ exports.getUnassignedDevices = async()=>{
 };
 
 
-// Assign device to client
+// =========================
+// GET DEVICE BY ID
+// =========================
+
+exports.getDeviceByDeviceId = async(deviceId)=>{
+
+    return await DeviceStatus.findOne({
+        deviceId
+    });
+};
+
+
+// =========================
+// ASSIGN DEVICE TO CLIENT
+// =========================
+
 exports.assignDeviceToClient = async(
     deviceId,
     clientId
@@ -120,6 +182,12 @@ exports.assignDeviceToClient = async(
         throw new Error("Device already assigned");
     }
 
+    const client = await User.findById(clientId);
+
+    if(!client){
+        throw new Error("Client not found");
+    }
+
     device.clientId = clientId;
     device.assigned = true;
 
@@ -129,7 +197,11 @@ exports.assignDeviceToClient = async(
 };
 
 
-// Remove device from client (optional but important)
+
+// =========================
+// UNASSIGN DEVICE
+// =========================
+
 exports.unassignDevice = async(deviceId)=>{
 
     const device = await DeviceStatus.findOne({
@@ -146,4 +218,77 @@ exports.unassignDevice = async(deviceId)=>{
     await device.save();
 
     return device;
+};
+
+
+
+// =========================
+// OPTIONAL: TRANSFER DEVICE
+// =========================
+
+exports.transferDevice = async(
+    deviceId,
+    newClientId
+)=>{
+
+    const device = await DeviceStatus.findOne({
+        deviceId
+    });
+
+    if(!device){
+        throw new Error("Device not found");
+    }
+
+    const newClient = await User.findById(newClientId);
+
+    if(!newClient){
+        throw new Error("Target client not found");
+    }
+
+    device.clientId = newClientId;
+    device.assigned = true;
+
+    await device.save();
+
+    return device;
+};
+
+
+
+// =========================
+// OPTIONAL: DEVICE HEARTBEAT
+// =========================
+
+exports.updateHeartbeat = async(deviceId)=>{
+
+    return await DeviceStatus.findOneAndUpdate(
+
+        { deviceId },
+
+        {
+            lastHeartbeat:new Date(),
+            internetStatus:"online"
+        },
+
+        { new:true }
+    );
+};
+
+
+
+// =========================
+// OPTIONAL: OFFLINE CHECK
+// =========================
+
+exports.markOfflineDevices = async()=>{
+
+    const threshold =
+    new Date(Date.now() - 5 * 60 * 1000); // 5 mins
+
+    return await DeviceStatus.updateMany(
+
+        { lastHeartbeat:{ $lt:threshold } },
+
+        { internetStatus:"offline" }
+    );
 };
