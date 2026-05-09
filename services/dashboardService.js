@@ -1,90 +1,110 @@
 const solarService = require("./solarService");
-
 const batteryService = require("./batteryService");
-
 const gridService = require("./gridService");
-
 const faultService = require("./faultService");
 
 const OMRequest = require("../modules/OMRequest");
-
 const DeviceStatus = require("../modules/DeviceStatus");
+const User = require("../modules/User");
+const FaultLog = require("../modules/FaultLog");
+
+
+// =========================
+// CLIENT DASHBOARD
+// =========================
 
 exports.getClientDashboard = async(clientId)=>{
 
-    const solar =
-    await solarService.getLatestByClient(clientId);
+    // Fetch latest readings in parallel (faster)
+    const [
+        solar,
+        battery,
+        grid,
+        faults,
+        device,
+        omRequests
+    ] = await Promise.all([
 
-    const battery =
-    await batteryService.getLatestByClient(clientId);
+        solarService.getLatestByClient(clientId),
 
-    const grid =
-    await gridService.getLatestByClient(clientId);
+        batteryService.getLatestByClient(clientId),
 
-    const faults =
-    await faultService.getClientFaults(clientId);
+        gridService.getLatestByClient(clientId),
 
-    const deviceStatus =
-    await DeviceStatus.findOne({ clientId });
+        faultService.getClientFaults(clientId),
 
-    const omRequests =
-    await OMRequest.find({ clientId });
+        DeviceStatus.findOne({ clientId }),
+
+        OMRequest
+        .find({ clientId })
+        .sort({ createdAt:-1 })
+        .limit(5) // latest requests only
+    ]);
 
     return {
 
-        solar,
+        solar: solar || null,
 
-        battery,
+        battery: battery || null,
 
-        grid,
+        grid: grid || null,
 
-        faults,
+        faults: faults || [],
 
-        deviceStatus,
+        device: device || null,
 
-        omRequests
+        omRequests: omRequests || []
     };
 };
 
+
+
+// =========================
+// ADMIN DASHBOARD
+// =========================
+
 exports.getAdminDashboard = async()=>{
 
-    const DeviceStatus =
-    require("../modules/DeviceStatus");
+    // Run all queries in parallel
+    const [
+        totalClients,
+        activeSystems,
+        pendingFaults,
+        pendingOM,
+        totalDevices,
+        offlineDevices
+    ] = await Promise.all([
 
-    const User =
-    require("../modules/User");
+        User.countDocuments({ role:"client" }),
 
-    const FaultLog =
-    require("../modules/FaultLog");
+        DeviceStatus.countDocuments({
+            internetStatus:"online"
+        }),
 
-    const OMRequest =
-    require("../modules/OMRequest");
+        FaultLog.countDocuments({
+            resolved:false
+        }),
 
-    const totalClients =
-    await User.countDocuments({
-        role:"client"
-    });
+        OMRequest.countDocuments({
+            status:"pending"
+        }),
 
-    const activeSystems =
-    await DeviceStatus.countDocuments({
-        internetStatus:"online"
-    });
+        DeviceStatus.countDocuments(),
 
-    const pendingFaults =
-    await FaultLog.countDocuments({
-        resolved:false
-    });
-
-    const pendingOM =
-    await OMRequest.countDocuments({
-        status:"pending"
-    });
+        DeviceStatus.countDocuments({
+            internetStatus:"offline"
+        })
+    ]);
 
     return {
 
         totalClients,
 
+        totalDevices,
+
         activeSystems,
+
+        offlineDevices,
 
         pendingFaults,
 
