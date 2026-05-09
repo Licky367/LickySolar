@@ -17,6 +17,8 @@ const gridRoutes = require("./routes/gridRoutes");
 const faultRoutes = require("./routes/faultRoutes");
 const omRoutes = require("./routes/omRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const deviceAdminRoutes =
+require("./routes/deviceAdminRoutes");
 
 const app = express();
 
@@ -101,6 +103,7 @@ app.use("/faults", faultRoutes);
 app.use("/om", omRoutes);
 
 app.use("/admin", adminRoutes);
+app.use("/admin", deviceAdminRoutes);
 
 /* =========================
    404
