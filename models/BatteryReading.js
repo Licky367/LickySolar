@@ -18,6 +18,11 @@ const batteryReadingSchema = new mongoose.Schema({
         default:0
     },
 
+    power:{   // ✅ added
+        type:Number,
+        default:0
+    },
+
     percentage:{
         type:Number,
         default:0
