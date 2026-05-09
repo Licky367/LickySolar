@@ -1,4 +1,4 @@
-const FaultLog = require("../modules/FaultLog");
+const FaultLog = require("../models/FaultLog");
 
 exports.createFault = async(data)=>{
 
