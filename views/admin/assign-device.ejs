@@ -3,10 +3,12 @@
 <h3>Assign Device to Client</h3>
 
 <p style="color:#666; margin-bottom:20px;">
-Enter the device MAC address and the client's email to link them.
+Link a physical ESP32 device to a client account using its MAC address.
 </p>
 
 <form action="/admin/devices/assign" method="POST">
+
+<div class="grid">
 
 <!-- =========================
      MAC ADDRESS
@@ -21,10 +23,11 @@ Enter the device MAC address and the client's email to link them.
     class="form-control"
     placeholder="e.g. 24:6F:28:AB:CD:EF"
     required
+    pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
 />
 
 <small style="color:#777;">
-Find this using ESP32 → WiFi.macAddress()
+Format: XX:XX:XX:XX:XX:XX (from ESP32 → WiFi.macAddress())
 </small>
 
 </div>
@@ -45,8 +48,15 @@ Find this using ESP32 → WiFi.macAddress()
     required
 />
 
+<small style="color:#777;">
+Device will be linked to this user
+</small>
+
 </div>
 
+</div>
+
+<br>
 
 <!-- =========================
      SUBMIT
@@ -56,5 +66,48 @@ Assign Device
 </button>
 
 </form>
+
+</div>
+
+
+<br>
+
+
+<!-- =========================
+     HELPER INFO CARD
+========================= -->
+<div class="card">
+
+<h3 style="margin-bottom:15px;">
+How to Find MAC Address
+</h3>
+
+<pre style="
+background:#111;
+color:#0f0;
+padding:15px;
+border-radius:10px;
+font-size:13px;
+overflow:auto;
+">
+
+#include &lt;WiFi.h&gt;
+
+void setup(){
+  Serial.begin(115200);
+  WiFi.begin("ssid","password");
+
+  while(WiFi.status() != WL_CONNECTED){
+    delay(1000);
+  }
+
+  Serial.println(WiFi.macAddress());
+}
+
+</pre>
+
+<p style="color:#666; margin-top:10px;">
+Upload this to ESP32 and check Serial Monitor.
+</p>
 
 </div>
