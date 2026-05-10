@@ -1,15 +1,29 @@
 const User = require("../modules/User");
 const AdminInvite = require("../modules/AdminInvite");
 const DeviceStatus = require("../modules/DeviceStatus");
-
 const crypto = require("crypto");
+
+
+// =========================
+// HELPERS
+// =========================
+
+// 🔐 Generate API key
+const generateApiKey = () => {
+    return crypto.randomBytes(24).toString("hex");
+};
+
+// 🔥 Normalize MAC
+const normalizeMac = (mac) => {
+    if (!mac) return null;
+    return mac.trim().toUpperCase();
+};
 
 
 // =========================
 // CLIENTS
 // =========================
 
-// Get all clients
 exports.getClients = async () => {
     return await User
         .find({ role: "client" })
@@ -17,7 +31,6 @@ exports.getClients = async () => {
 };
 
 
-// Get single client with device
 exports.getClientWithDevice = async (id) => {
 
     const client = await User.findById(id);
@@ -32,11 +45,9 @@ exports.getClientWithDevice = async (id) => {
 };
 
 
-// Get client basic info
 exports.getClientById = async (id) => {
     return await User.findById(id);
 };
-
 
 
 // =========================
@@ -69,47 +80,39 @@ exports.inviteAdmin = async (data) => {
 };
 
 
-
-// =========================
-// DEVICE OPERATIONS
-// =========================
-
-
-// 🔐 Generate API key
-const generateApiKey = () => {
-    return crypto.randomBytes(24).toString("hex");
-};
-
-
 // =========================
 // CREATE DEVICE
 // =========================
 
 exports.createDevice = async (data) => {
 
-    // 🔥 Ensure deviceId is unique
-    const existing = await DeviceStatus.findOne({
-        deviceId: data.deviceId
-    });
+    if (!data.deviceId || !data.deviceId.trim()) {
+        throw new Error("Device ID is required");
+    }
+
+    const deviceId = data.deviceId.trim();
+
+    // Unique deviceId
+    const existing = await DeviceStatus.findOne({ deviceId });
 
     if (existing) {
         throw new Error("Device already exists");
     }
 
-    // 🔥 Optional: Validate MAC address format
-    if (data.macAddress) {
+    let macAddress = normalizeMac(data.macAddress);
+
+    // Validate MAC
+    if (macAddress) {
 
         const macRegex =
-            /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/;
+            /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/;
 
-        if (!macRegex.test(data.macAddress)) {
+        if (!macRegex.test(macAddress)) {
             throw new Error("Invalid MAC address format");
         }
 
         const existingMac =
-            await DeviceStatus.findOne({
-                macAddress: data.macAddress
-            });
+            await DeviceStatus.findOne({ macAddress });
 
         if (existingMac) {
             throw new Error("MAC address already registered");
@@ -120,20 +123,15 @@ exports.createDevice = async (data) => {
 
     const device = await DeviceStatus.create({
 
-        deviceId: data.deviceId,
-
+        deviceId,
         name: data.name || "Solar Device",
-
         location: data.location || "",
-
-        macAddress: data.macAddress || null,
+        macAddress: macAddress || null,
 
         apiKey,
-
         assigned: false,
 
         internetStatus: "offline",
-
         lastHeartbeat: null
     });
 
@@ -141,13 +139,11 @@ exports.createDevice = async (data) => {
 };
 
 
-
 // =========================
-// GET ALL DEVICES
+// GET DEVICES
 // =========================
 
 exports.getAllDevices = async () => {
-
     return await DeviceStatus
         .find()
         .populate("clientId")
@@ -155,68 +151,54 @@ exports.getAllDevices = async () => {
 };
 
 
-// =========================
-// GET UNASSIGNED DEVICES
-// =========================
-
 exports.getUnassignedDevices = async () => {
-
-    return await DeviceStatus.find({
-        assigned: false
-    });
+    return await DeviceStatus.find({ assigned: false });
 };
 
-
-// =========================
-// GET DEVICE BY DEVICE ID
-// =========================
 
 exports.getDeviceByDeviceId = async (deviceId) => {
-
-    return await DeviceStatus.findOne({
-        deviceId
-    });
+    return await DeviceStatus.findOne({ deviceId });
 };
 
-
-// =========================
-// GET DEVICE BY MAC ADDRESS
-// =========================
 
 exports.getDeviceByMac = async (macAddress) => {
-
     return await DeviceStatus.findOne({
-        macAddress
+        macAddress: normalizeMac(macAddress)
     });
 };
 
 
-
 // =========================
-// ASSIGN DEVICE (MAC + EMAIL)
+// ✅ ASSIGN DEVICE (FIXED)
 // =========================
 
-exports.assignDeviceToClient = async (
+exports.assignDeviceByMacAndEmail = async (
     macAddress,
     email
 ) => {
 
-    // 🔥 Find device using MAC
-    const device = await DeviceStatus.findOne({
-        macAddress
-    });
+    if (!macAddress || !email) {
+        throw new Error("MAC address and email are required");
+    }
+
+    macAddress = normalizeMac(macAddress);
+
+    // 🔥 Find device
+    const device = await DeviceStatus.findOne({ macAddress });
 
     if (!device) {
-        throw new Error("Device not found with this MAC address");
+        throw new Error(
+            "Device not found. Ensure ESP32 has connected at least once."
+        );
     }
 
     if (device.assigned) {
         throw new Error("Device already assigned");
     }
 
-    // 🔥 Find client using email
+    // 🔥 Find client
     const client = await User.findOne({
-        email,
+        email: email.trim(),
         role: "client"
     });
 
@@ -234,16 +216,13 @@ exports.assignDeviceToClient = async (
 };
 
 
-
 // =========================
 // UNASSIGN DEVICE
 // =========================
 
 exports.unassignDevice = async (deviceId) => {
 
-    const device = await DeviceStatus.findOne({
-        deviceId
-    });
+    const device = await DeviceStatus.findOne({ deviceId });
 
     if (!device) {
         throw new Error("Device not found");
@@ -258,19 +237,13 @@ exports.unassignDevice = async (deviceId) => {
 };
 
 
-
 // =========================
 // TRANSFER DEVICE
 // =========================
 
-exports.transferDevice = async (
-    deviceId,
-    newClientId
-) => {
+exports.transferDevice = async (deviceId, newClientId) => {
 
-    const device = await DeviceStatus.findOne({
-        deviceId
-    });
+    const device = await DeviceStatus.findOne({ deviceId });
 
     if (!device) {
         throw new Error("Device not found");
@@ -291,26 +264,21 @@ exports.transferDevice = async (
 };
 
 
-
 // =========================
-// DEVICE HEARTBEAT (ESP32)
+// HEARTBEAT (ESP32)
 // =========================
 
 exports.updateHeartbeat = async (deviceId) => {
 
     return await DeviceStatus.findOneAndUpdate(
-
         { deviceId },
-
         {
             lastHeartbeat: new Date(),
             internetStatus: "online"
         },
-
         { new: true }
     );
 };
-
 
 
 // =========================
@@ -320,16 +288,10 @@ exports.updateHeartbeat = async (deviceId) => {
 exports.markOfflineDevices = async () => {
 
     const threshold =
-        new Date(Date.now() - 5 * 60 * 1000); // 5 mins
+        new Date(Date.now() - 5 * 60 * 1000);
 
     return await DeviceStatus.updateMany(
-
-        {
-            lastHeartbeat: { $lt: threshold }
-        },
-
-        {
-            internetStatus: "offline"
-        }
+        { lastHeartbeat: { $lt: threshold } },
+        { internetStatus: "offline" }
     );
 };
