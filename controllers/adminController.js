@@ -5,17 +5,16 @@ const dashboardService = require("../services/dashboardService");
 // =========================
 // CLIENTS LIST PAGE
 // =========================
-exports.clientsPage = async(req,res)=>{
-    try{
-
+exports.clientsPage = async (req, res) => {
+    try {
         const clients = await adminService.getClients();
 
-        res.render("admin/clients",{
-            title:"Clients",
+        res.render("admin/clients", {
+            title: "Clients",
             clients
         });
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin");
     }
@@ -25,30 +24,29 @@ exports.clientsPage = async(req,res)=>{
 // =========================
 // CLIENT DETAILS PAGE
 // =========================
-exports.clientDetailsPage = async(req,res)=>{
-    try{
-
+exports.clientDetailsPage = async (req, res) => {
+    try {
         const { id } = req.params;
 
         const { client, device } =
-        await adminService.getClientWithDevice(id);
+            await adminService.getClientWithDevice(id);
 
-        if(!client){
-            req.flash("error","Client not found");
+        if (!client) {
+            req.flash("error", "Client not found");
             return res.redirect("/admin/clients");
         }
 
         const dashboard =
-        await dashboardService.getClientDashboard(id);
+            await dashboardService.getClientDashboard(id);
 
-        res.render("admin/client-details",{
-            title:"Client Details",
+        res.render("admin/client-details", {
+            title: "Client Details",
             client,
             device,
             dashboard
         });
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin/clients");
     }
@@ -58,17 +56,16 @@ exports.clientDetailsPage = async(req,res)=>{
 // =========================
 // ADMINS PAGE
 // =========================
-exports.adminsPage = async(req,res)=>{
-    try{
-
+exports.adminsPage = async (req, res) => {
+    try {
         const admins = await adminService.getAdmins();
 
-        res.render("admin/admins",{
-            title:"Admins",
+        res.render("admin/admins", {
+            title: "Admins",
             admins
         });
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin");
     }
@@ -78,9 +75,9 @@ exports.adminsPage = async(req,res)=>{
 // =========================
 // INVITE ADMIN PAGE
 // =========================
-exports.getInvitePage = (req,res)=>{
-    res.render("admin/invite-admin",{
-        title:"Invite Admin"
+exports.getInvitePage = (req, res) => {
+    res.render("admin/invite-admin", {
+        title: "Invite Admin"
     });
 };
 
@@ -88,19 +85,18 @@ exports.getInvitePage = (req,res)=>{
 // =========================
 // INVITE ADMIN ACTION
 // =========================
-exports.inviteAdmin = async(req,res)=>{
-    try{
-
+exports.inviteAdmin = async (req, res) => {
+    try {
         await adminService.inviteAdmin({
-            email:req.body.email,
-            invitedBy:req.session.user._id
+            email: req.body.email,
+            invitedBy: req.session.user._id
         });
 
-        req.flash("success","Admin invited successfully");
+        req.flash("success", "Admin invited successfully");
 
         res.redirect("/admin/admins");
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin/invite-admin");
     }
@@ -110,22 +106,21 @@ exports.inviteAdmin = async(req,res)=>{
 // =========================
 // DEVICES LIST PAGE
 // =========================
-exports.devicesPage = async(req,res)=>{
-    try{
-
+exports.devicesPage = async (req, res) => {
+    try {
         const devices =
-        await adminService.getAllDevices();
+            await adminService.getAllDevices();
 
         const deviceCredentials =
-        req.flash("deviceCredentials")[0];
+            req.flash("deviceCredentials")[0];
 
-        res.render("admin/devices",{
-            title:"Devices",
+        res.render("admin/devices", {
+            title: "Devices",
             devices,
             deviceCredentials
         });
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin");
     }
@@ -133,38 +128,50 @@ exports.devicesPage = async(req,res)=>{
 
 
 // =========================
-// CREATE DEVICE PAGE
+// DEVICE CONFIG PAGE (NEW)
 // =========================
-exports.getCreateDevicePage = (req,res)=>{
-    res.render("admin/create-device",{
-        title:"Register Device"
+exports.getDeviceConfigPage = (req, res) => {
+    res.render("admin/device-config", {
+        title: "Configure Device"
     });
 };
 
 
 // =========================
-// CREATE DEVICE
+// CREATE DEVICE (CONFIG FLOW)
 // =========================
-exports.createDevice = async(req,res)=>{
-    try{
+exports.createDevice = async (req, res) => {
+    try {
+
+        let { deviceId, name, location, macAddress } = req.body;
+
+        // Normalize MAC address if provided
+        if (macAddress) {
+            macAddress = macAddress.trim().toUpperCase();
+        }
 
         const device =
-        await adminService.createDevice(req.body);
+            await adminService.createDevice({
+                deviceId,
+                name,
+                location,
+                macAddress
+            });
 
-        // Store credentials temporarily
+        // 🔥 Show credentials once after creation
         req.flash("deviceCredentials", {
             deviceId: device.deviceId,
             apiKey: device.apiKey,
             macAddress: device.macAddress || null
         });
 
-        req.flash("success","Device created successfully");
+        req.flash("success", "Device created successfully");
 
         res.redirect("/admin/devices");
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
-        res.redirect("/admin/devices/create");
+        res.redirect("/admin/devices/config");
     }
 };
 
@@ -172,14 +179,13 @@ exports.createDevice = async(req,res)=>{
 // =========================
 // ASSIGN DEVICE PAGE
 // =========================
-exports.assignDevicePage = async(req,res)=>{
-    try{
-
-        res.render("admin/assign-device",{
-            title:"Assign Device"
+exports.assignDevicePage = async (req, res) => {
+    try {
+        res.render("admin/assign-device", {
+            title: "Assign Device"
         });
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin/devices");
     }
@@ -189,13 +195,13 @@ exports.assignDevicePage = async(req,res)=>{
 // =========================
 // ASSIGN DEVICE (MAC + EMAIL)
 // =========================
-exports.assignDevice = async(req,res)=>{
-    try{
+exports.assignDevice = async (req, res) => {
+    try {
 
         let { macAddress, email } = req.body;
 
         // Normalize MAC
-        if(macAddress){
+        if (macAddress) {
             macAddress = macAddress.trim().toUpperCase();
         }
 
@@ -204,11 +210,11 @@ exports.assignDevice = async(req,res)=>{
             email
         );
 
-        req.flash("success","Device assigned successfully");
+        req.flash("success", "Device assigned successfully");
 
         res.redirect("/admin/devices");
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin/devices/assign");
     }
@@ -218,18 +224,18 @@ exports.assignDevice = async(req,res)=>{
 // =========================
 // UNASSIGN DEVICE
 // =========================
-exports.unassignDevice = async(req,res)=>{
-    try{
+exports.unassignDevice = async (req, res) => {
+    try {
 
         const { deviceId } = req.body;
 
         await adminService.unassignDevice(deviceId);
 
-        req.flash("success","Device unassigned successfully");
+        req.flash("success", "Device unassigned successfully");
 
         res.redirect("/admin/devices");
 
-    }catch(error){
+    } catch (error) {
         req.flash("error", error.message);
         res.redirect("/admin/devices");
     }
