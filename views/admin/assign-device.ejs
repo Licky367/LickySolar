@@ -2,46 +2,57 @@
 
 <h3>Assign Device to Client</h3>
 
+<p style="color:#666; margin-bottom:20px;">
+Enter the device MAC address and the client's email to link them.
+</p>
+
 <form action="/admin/devices/assign" method="POST">
 
+<!-- =========================
+     MAC ADDRESS
+========================= -->
 <div class="form-group">
 
-<label>Select Device</label>
+<label>Device MAC Address</label>
 
-<select name="deviceId" class="form-control">
+<input 
+    type="text"
+    name="macAddress"
+    class="form-control"
+    placeholder="e.g. 24:6F:28:AB:CD:EF"
+    required
+/>
 
-<% devices.forEach(d => { %>
-
-<option value="<%= d.deviceId %>">
-<%= d.deviceId %> - <%= d.name %>
-</option>
-
-<% }) %>
-
-</select>
+<small style="color:#777;">
+Find this using ESP32 → WiFi.macAddress()
+</small>
 
 </div>
 
+
+<!-- =========================
+     CLIENT EMAIL
+========================= -->
 <div class="form-group">
 
-<label>Select Client</label>
+<label>Client Email</label>
 
-<select name="clientId" class="form-control">
-
-<% clients.forEach(c => { %>
-
-<option value="<%= c._id %>">
-<%= c.name %> (<%= c.email %>)
-</option>
-
-<% }) %>
-
-</select>
+<input 
+    type="email"
+    name="email"
+    class="form-control"
+    placeholder="e.g. client@email.com"
+    required
+/>
 
 </div>
 
+
+<!-- =========================
+     SUBMIT
+========================= -->
 <button class="btn btn-green">
-Assign
+Assign Device
 </button>
 
 </form>
