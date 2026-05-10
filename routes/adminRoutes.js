@@ -14,10 +14,9 @@ require("../middlewares/superAdminMiddleware");
 
 
 // =========================
-// APPLY GLOBAL MIDDLEWARES
+// GLOBAL MIDDLEWARE
 // =========================
 
-// All admin routes require login + admin role
 router.use(authMiddleware, adminMiddleware);
 
 
@@ -47,7 +46,7 @@ router.get(
 
 
 // =========================
-// INVITE ADMIN (SUPER ADMIN ONLY)
+// INVITE ADMIN (SUPER ADMIN)
 // =========================
 
 router.get(
@@ -67,18 +66,24 @@ router.post(
 // DEVICES
 // =========================
 
-// List devices
+// 📋 List all devices
 router.get(
     "/devices",
     adminController.devicesPage
 );
 
-// Create device
+
+// =========================
+// 🔥 DEVICE CONFIG (NEW FLOW)
+// =========================
+
+// Render config page (replaces create-device.ejs)
 router.get(
-    "/devices/create",
-    adminController.getCreateDevicePage
+    "/devices/config",
+    adminController.getDeviceConfigPage
 );
 
+// Create device (from config page)
 router.post(
     "/devices/create",
     adminController.createDevice
@@ -89,7 +94,7 @@ router.post(
 // DEVICE ASSIGNMENT
 // =========================
 
-// Assign page
+// Assign page (MAC + Email)
 router.get(
     "/devices/assign",
     adminController.assignDevicePage
