@@ -19,6 +19,8 @@ const omRoutes = require("./routes/omRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const irradianceRoutes = require("./routes/irradianceRoutes");
 const sourceRoutes = require("./routes/sourceRoutes");
+const deviceRoutes = require("./routes/api/deviceRoutes");
+
 
 const app = express();
 
@@ -107,6 +109,8 @@ app.use("/admin", adminRoutes);
 app.use("/irradiance", irradianceRoutes);
 
 app.use("/", sourceRoutes);
+
+app.use("/api/device", deviceRoutes);
 
 /* =========================
    404
