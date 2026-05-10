@@ -1,20 +1,14 @@
-const adminService =
-require("../services/adminService");
-
-const dashboardService =
-require("../services/dashboardService");
+const adminService = require("../services/adminService");
+const dashboardService = require("../services/dashboardService");
 
 
 // =========================
 // CLIENTS LIST PAGE
 // =========================
-
 exports.clientsPage = async(req,res)=>{
-
     try{
 
-        const clients =
-        await adminService.getClients();
+        const clients = await adminService.getClients();
 
         res.render("admin/clients",{
             title:"Clients",
@@ -22,35 +16,25 @@ exports.clientsPage = async(req,res)=>{
         });
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin");
     }
 };
 
 
-
 // =========================
 // CLIENT DETAILS PAGE
 // =========================
-
 exports.clientDetailsPage = async(req,res)=>{
-
     try{
 
         const { id } = req.params;
 
-        const {
-            client,
-            device
-        } =
+        const { client, device } =
         await adminService.getClientWithDevice(id);
 
         if(!client){
-
             req.flash("error","Client not found");
-
             return res.redirect("/admin/clients");
         }
 
@@ -65,25 +49,19 @@ exports.clientDetailsPage = async(req,res)=>{
         });
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin/clients");
     }
 };
 
 
-
 // =========================
 // ADMINS PAGE
 // =========================
-
 exports.adminsPage = async(req,res)=>{
-
     try{
 
-        const admins =
-        await adminService.getAdmins();
+        const admins = await adminService.getAdmins();
 
         res.render("admin/admins",{
             title:"Admins",
@@ -91,34 +69,26 @@ exports.adminsPage = async(req,res)=>{
         });
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin");
     }
 };
 
 
-
 // =========================
 // INVITE ADMIN PAGE
 // =========================
-
 exports.getInvitePage = (req,res)=>{
-
     res.render("admin/invite-admin",{
         title:"Invite Admin"
     });
 };
 
 
-
 // =========================
 // INVITE ADMIN ACTION
 // =========================
-
 exports.inviteAdmin = async(req,res)=>{
-
     try{
 
         await adminService.inviteAdmin({
@@ -126,95 +96,85 @@ exports.inviteAdmin = async(req,res)=>{
             invitedBy:req.session.user._id
         });
 
-        req.flash(
-            "success",
-            "Admin invited successfully"
-        );
+        req.flash("success","Admin invited successfully");
 
         res.redirect("/admin/admins");
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin/invite-admin");
     }
 };
 
 
-
 // =========================
 // DEVICES LIST PAGE
 // =========================
-
 exports.devicesPage = async(req,res)=>{
-
     try{
 
         const devices =
         await adminService.getAllDevices();
 
+        // 🔥 include device credentials flash
+        const deviceCredentials =
+        req.flash("deviceCredentials")[0];
+
         res.render("admin/devices",{
             title:"Devices",
-            devices
+            devices,
+            deviceCredentials // send to view
         });
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin");
     }
 };
 
 
-
 // =========================
 // CREATE DEVICE PAGE
 // =========================
-
 exports.getCreateDevicePage = (req,res)=>{
-
     res.render("admin/create-device",{
         title:"Register Device"
     });
 };
 
 
-
 // =========================
 // CREATE DEVICE
 // =========================
-
 exports.createDevice = async(req,res)=>{
-
     try{
 
+        const device =
         await adminService.createDevice(req.body);
 
-        req.flash(
-            "success",
-            "Device created successfully"
-        );
+        // 🔥 store credentials in flash (TEMP DISPLAY)
+        req.flash("deviceCredentials", {
+            deviceId: device.deviceId,
+            apiKey: device.apiKey,
+            macAddress: device.macAddress || null
+        });
+
+        req.flash("success","Device created successfully");
 
         res.redirect("/admin/devices");
 
     }catch(error){
 
         req.flash("error", error.message);
-
         res.redirect("/admin/devices/create");
     }
 };
 
 
-
 // =========================
 // ASSIGN DEVICE PAGE
 // =========================
-
 exports.assignDevicePage = async(req,res)=>{
-
     try{
 
         const devices =
@@ -230,73 +190,52 @@ exports.assignDevicePage = async(req,res)=>{
         });
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin/devices");
     }
 };
 
 
-
 // =========================
 // ASSIGN DEVICE ACTION
 // =========================
-
 exports.assignDevice = async(req,res)=>{
-
     try{
 
-        const {
-            deviceId,
-            clientId
-        } = req.body;
+        const { deviceId, clientId } = req.body;
 
         await adminService.assignDeviceToClient(
             deviceId,
             clientId
         );
 
-        req.flash(
-            "success",
-            "Device assigned successfully"
-        );
+        req.flash("success","Device assigned successfully");
 
         res.redirect("/admin/devices");
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin/devices/assign");
     }
 };
 
 
-
 // =========================
 // UNASSIGN DEVICE
 // =========================
-
 exports.unassignDevice = async(req,res)=>{
-
     try{
 
         const { deviceId } = req.body;
 
         await adminService.unassignDevice(deviceId);
 
-        req.flash(
-            "success",
-            "Device unassigned successfully"
-        );
+        req.flash("success","Device unassigned successfully");
 
         res.redirect("/admin/devices");
 
     }catch(error){
-
         req.flash("error", error.message);
-
         res.redirect("/admin/devices");
     }
 };
