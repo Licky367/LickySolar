@@ -1,0 +1,274 @@
+<div class="card">
+
+<h2 style="margin-bottom:20px;">
+Device Setup & Configuration
+</h2>
+
+<!-- =========================
+     CREATE DEVICE FORM
+========================= -->
+
+<form action="/admin/devices/create" method="POST">
+
+<div class="grid">
+
+<div class="form-group">
+<label>Device ID</label>
+<input
+    name="deviceId"
+    class="form-control"
+    placeholder="e.g. DEV-001"
+    required
+/>
+</div>
+
+<div class="form-group">
+<label>Device Name</label>
+<input
+    name="name"
+    class="form-control"
+    placeholder="Solar System A"
+/>
+</div>
+
+<div class="form-group">
+<label>Installation Location</label>
+<input
+    name="location"
+    class="form-control"
+    placeholder="Nairobi - Westlands"
+/>
+</div>
+
+<div class="form-group">
+<label>MAC Address (Optional)</label>
+<input
+    name="macAddress"
+    class="form-control"
+    placeholder="AA:BB:CC:DD:EE:FF"
+/>
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-green">
+Create & Generate Configuration
+</button>
+
+</form>
+
+</div>
+
+<br>
+
+
+<!-- =========================
+     DEVICE CREDENTIALS DISPLAY
+========================= -->
+
+<% if(device){ %>
+
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+Device Credentials
+</h3>
+
+<div class="grid">
+
+<div>
+<label>Device ID</label>
+<div class="badge"><%= device.deviceId %></div>
+</div>
+
+<div>
+<label>API Key</label>
+<div class="badge" style="word-break:break-all;">
+<%= device.apiKey %>
+</div>
+</div>
+
+<div>
+<label>MAC Address</label>
+<div class="badge">
+<%= device.macAddress || "Not set" %>
+</div>
+</div>
+
+<div>
+<label>Server URL</label>
+<div class="badge" style="word-break:break-all;">
+<%= serverUrl %>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+
+<!-- =========================
+     ESP32 FIRMWARE TEMPLATE
+========================= -->
+
+<div class="card">
+
+<div style="display:flex;justify-content:space-between;align-items:center;">
+
+<h3>ESP32 Firmware (Copy & Upload)</h3>
+
+<button onclick="copyCode()" class="btn btn-green">
+Copy Code
+</button>
+
+</div>
+
+<br>
+
+<div style="
+background:#111;
+color:#0f0;
+padding:20px;
+border-radius:12px;
+font-family:monospace;
+font-size:13px;
+overflow:auto;
+max-height:500px;
+">
+
+<pre id="codeBlock">
+
+#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+
+// =========================
+// WIFI CONFIG
+// =========================
+const char* ssid = "YOUR_WIFI";
+const char* password = "YOUR_PASSWORD";
+
+// =========================
+// SERVER CONFIG
+// =========================
+const char* serverUrl = "<%= serverUrl %>";
+
+// =========================
+// DEVICE AUTH
+// =========================
+const char* deviceId = "<%= device.deviceId %>";
+const char* apiKey = "<%= device.apiKey %>";
+
+// =========================
+// PINS (EDIT BASED ON YOUR HARDWARE)
+// =========================
+#define SOLAR_VOLTAGE_PIN 34
+#define SOLAR_CURRENT_PIN 35
+#define BATTERY_VOLTAGE_PIN 32
+#define LOAD_CURRENT_PIN 33
+
+void setup(){
+    Serial.begin(115200);
+
+    WiFi.begin(ssid, password);
+
+    while(WiFi.status() != WL_CONNECTED){
+        delay(1000);
+        Serial.println("Connecting to WiFi...");
+    }
+
+    Serial.println("Connected!");
+}
+
+void loop(){
+
+    if(WiFi.status() == WL_CONNECTED){
+
+        HTTPClient http;
+
+        http.begin(serverUrl);
+        http.addHeader("Content-Type", "application/json");
+
+        // =========================
+        // MOCK DATA (REPLACE WITH REAL SENSOR READINGS)
+        // =========================
+
+        float solarVoltage = analogRead(SOLAR_VOLTAGE_PIN);
+        float solarCurrent = analogRead(SOLAR_CURRENT_PIN);
+
+        float batteryVoltage = analogRead(BATTERY_VOLTAGE_PIN);
+        float loadCurrent = analogRead(LOAD_CURRENT_PIN);
+
+        float solarPower = solarVoltage * solarCurrent;
+        float loadPower = loadCurrent * 220;
+
+        String activeSource = "solar";
+
+        // =========================
+        // BASIC SOURCE LOGIC
+        // =========================
+
+        if(solarPower < loadPower){
+            if(batteryVoltage > 11){
+                activeSource = "battery";
+            }else{
+                activeSource = "grid";
+            }
+        }
+
+        // =========================
+        // JSON PAYLOAD
+        // =========================
+
+        String payload = "{";
+        payload += "\"deviceId\":\"" + String(deviceId) + "\",";
+        payload += "\"apiKey\":\"" + String(apiKey) + "\",";
+
+        payload += "\"solar\":{";
+        payload += "\"voltage\":" + String(solarVoltage) + ",";
+        payload += "\"current\":" + String(solarCurrent) + ",";
+        payload += "\"power\":" + String(solarPower);
+        payload += "},";
+
+        payload += "\"battery\":{";
+        payload += "\"voltage\":" + String(batteryVoltage);
+        payload += "},";
+
+        payload += "\"activeSource\":\"" + activeSource + "\",";
+        payload += "\"loadPower\":" + String(loadPower);
+
+        payload += "}";
+
+        int responseCode = http.POST(payload);
+
+        Serial.println(responseCode);
+
+        http.end();
+    }
+
+    delay(5000); // send every 5 seconds
+}
+
+</pre>
+
+</div>
+
+</div>
+
+<% } %>
+
+
+<script>
+function copyCode(){
+
+    const code =
+    document.getElementById("codeBlock").innerText;
+
+    navigator.clipboard.writeText(code);
+
+    alert("Code copied!");
+}
+</script>
