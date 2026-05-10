@@ -1,6 +1,58 @@
 <div class="card">
 
-<div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+<!-- =========================
+     DEVICE CREATED ALERT
+========================= -->
+<% if(deviceCredentials){ %>
+
+<div style="
+margin-bottom:20px;
+padding:15px;
+border-left:5px solid #0c5f2c;
+background:#f7faf9;
+border-radius:10px;
+">
+
+<h3>Device Created Successfully</h3>
+
+<p style="color:#666;">
+Use these credentials to program your ESP32
+</p>
+
+<div style="margin-top:10px; line-height:1.8;">
+
+<strong>Device ID:</strong>
+<%= deviceCredentials.deviceId %><br>
+
+<strong>API Key:</strong>
+<%= deviceCredentials.apiKey %><br>
+
+<strong>MAC Address:</strong>
+<%= deviceCredentials.macAddress || "Not set" %>
+
+</div>
+
+<pre style="
+margin-top:15px;
+background:#111;
+color:#0f0;
+padding:12px;
+border-radius:10px;
+overflow:auto;
+">
+const char* deviceId = "<%= deviceCredentials.deviceId %>";
+const char* apiKey   = "<%= deviceCredentials.apiKey %>";
+</pre>
+
+</div>
+
+<% } %>
+
+
+<!-- =========================
+     HEADER
+========================= -->
+<div style="display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
 
 <h3>Devices</h3>
 
@@ -18,13 +70,21 @@ Assign Device
 
 </div>
 
+
+<!-- =========================
+     TABLE
+========================= -->
+<div style="overflow-x:auto;">
+
 <table>
 
 <tr>
 <th>Device ID</th>
 <th>Name</th>
+<th>Location</th>
 <th>Client</th>
 <th>Status</th>
+<th>MAC Address</th>
 <th>API Key</th>
 </tr>
 
@@ -34,18 +94,33 @@ Assign Device
 
 <td><%= d.deviceId %></td>
 
-<td><%= d.name %></td>
+<td><%= d.name || "-" %></td>
+
+<td><%= d.location || "-" %></td>
 
 <td>
 <%= d.clientId ? d.clientId.name : "Unassigned" %>
 </td>
 
 <td>
+<span style="
+padding:6px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+background:<%= d.assigned ? '#e7fff0' : '#fff5d9' %>;
+color:<%= d.assigned ? '#0c5f2c' : '#946200' %>;
+">
 <%= d.assigned ? "Assigned" : "Free" %>
+</span>
 </td>
 
 <td style="font-size:12px;">
-<%= d.apiKey %>
+<%= d.macAddress || "-" %>
+</td>
+
+<td style="font-size:12px; font-family:monospace;">
+••••••••••
 </td>
 
 </tr>
@@ -53,5 +128,7 @@ Assign Device
 <% }) %>
 
 </table>
+
+</div>
 
 </div>
