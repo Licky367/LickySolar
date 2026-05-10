@@ -116,14 +116,13 @@ exports.devicesPage = async(req,res)=>{
         const devices =
         await adminService.getAllDevices();
 
-        // 🔥 include device credentials flash
         const deviceCredentials =
         req.flash("deviceCredentials")[0];
 
         res.render("admin/devices",{
             title:"Devices",
             devices,
-            deviceCredentials // send to view
+            deviceCredentials
         });
 
     }catch(error){
@@ -152,7 +151,7 @@ exports.createDevice = async(req,res)=>{
         const device =
         await adminService.createDevice(req.body);
 
-        // 🔥 store credentials in flash (TEMP DISPLAY)
+        // Store credentials temporarily
         req.flash("deviceCredentials", {
             deviceId: device.deviceId,
             apiKey: device.apiKey,
@@ -164,7 +163,6 @@ exports.createDevice = async(req,res)=>{
         res.redirect("/admin/devices");
 
     }catch(error){
-
         req.flash("error", error.message);
         res.redirect("/admin/devices/create");
     }
@@ -177,16 +175,8 @@ exports.createDevice = async(req,res)=>{
 exports.assignDevicePage = async(req,res)=>{
     try{
 
-        const devices =
-        await adminService.getUnassignedDevices();
-
-        const clients =
-        await adminService.getClients();
-
         res.render("admin/assign-device",{
-            title:"Assign Device",
-            devices,
-            clients
+            title:"Assign Device"
         });
 
     }catch(error){
@@ -197,16 +187,21 @@ exports.assignDevicePage = async(req,res)=>{
 
 
 // =========================
-// ASSIGN DEVICE ACTION
+// ASSIGN DEVICE (MAC + EMAIL)
 // =========================
 exports.assignDevice = async(req,res)=>{
     try{
 
-        const { deviceId, clientId } = req.body;
+        let { macAddress, email } = req.body;
 
-        await adminService.assignDeviceToClient(
-            deviceId,
-            clientId
+        // Normalize MAC
+        if(macAddress){
+            macAddress = macAddress.trim().toUpperCase();
+        }
+
+        await adminService.assignDeviceByMacAndEmail(
+            macAddress,
+            email
         );
 
         req.flash("success","Device assigned successfully");
