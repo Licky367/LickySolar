@@ -1,65 +1,23 @@
 <div class="card">
 
 <!-- =========================
-     DEVICE CREATED ALERT
-========================= -->
-<% if(deviceCredentials){ %>
-
-<div style="
-margin-bottom:20px;
-padding:15px;
-border-left:5px solid #0c5f2c;
-background:#f7faf9;
-border-radius:10px;
-">
-
-<h3>Device Created Successfully</h3>
-
-<p style="color:#666;">
-Use these credentials to program your ESP32
-</p>
-
-<div style="margin-top:10px; line-height:1.8;">
-
-<strong>Device ID:</strong>
-<%= deviceCredentials.deviceId %><br>
-
-<strong>API Key:</strong>
-<%= deviceCredentials.apiKey %><br>
-
-<strong>MAC Address:</strong>
-<%= deviceCredentials.macAddress || "Not set" %>
-
-</div>
-
-<pre style="
-margin-top:15px;
-background:#111;
-color:#0f0;
-padding:12px;
-border-radius:10px;
-overflow:auto;
-">
-const char* deviceId = "<%= deviceCredentials.deviceId %>";
-const char* apiKey   = "<%= deviceCredentials.apiKey %>";
-</pre>
-
-</div>
-
-<% } %>
-
-
-<!-- =========================
      HEADER
 ========================= -->
-<div style="display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:10px;
+">
 
 <h3>Devices</h3>
 
 <div>
 
 <a href="/admin/devices/create" class="btn btn-green">
-Create Device
+New Device
 </a>
 
 <a href="/admin/devices/assign" class="btn btn-green">
@@ -84,43 +42,129 @@ Assign Device
 <th>Location</th>
 <th>Client</th>
 <th>Status</th>
-<th>MAC Address</th>
-<th>API Key</th>
+<th>Source</th>
+<th>Internet</th>
+<th>MAC</th>
+<th>Action</th>
 </tr>
 
 <% devices.forEach(d => { %>
 
 <tr>
 
-<td><%= d.deviceId %></td>
+<!-- DEVICE ID -->
+<td>
+<strong><%= d.deviceId %></strong>
+</td>
 
-<td><%= d.name || "-" %></td>
+<!-- NAME -->
+<td>
+<%= d.name || "-" %>
+</td>
 
-<td><%= d.location || "-" %></td>
+<!-- LOCATION -->
+<td>
+<%= d.location || "-" %>
+</td>
 
+<!-- CLIENT -->
 <td>
 <%= d.clientId ? d.clientId.name : "Unassigned" %>
 </td>
 
+<!-- ASSIGNMENT STATUS -->
 <td>
+
 <span style="
 padding:6px 10px;
 border-radius:20px;
 font-size:12px;
 font-weight:bold;
+
 background:<%= d.assigned ? '#e7fff0' : '#fff5d9' %>;
 color:<%= d.assigned ? '#0c5f2c' : '#946200' %>;
 ">
+
 <%= d.assigned ? "Assigned" : "Free" %>
+
 </span>
+
 </td>
 
+<!-- ACTIVE SOURCE -->
+<td>
+
+<span style="
+padding:6px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= d.activeSource === 'solar'
+? '#e7fff0'
+: d.activeSource === 'battery'
+? '#fff5d9'
+: '#ffe5e5'
+%>;
+
+color:
+<%= d.activeSource === 'solar'
+? '#0c5f2c'
+: d.activeSource === 'battery'
+? '#946200'
+: '#c40000'
+%>;
+">
+
+<%= d.activeSource %>
+
+</span>
+
+</td>
+
+<!-- INTERNET STATUS -->
+<td>
+
+<span style="
+padding:6px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+
+background:
+<%= d.internetStatus === 'online'
+? '#e7fff0'
+: '#ffe5e5'
+%>;
+
+color:
+<%= d.internetStatus === 'online'
+? '#0c5f2c'
+: '#c40000'
+%>;
+">
+
+<%= d.internetStatus %>
+
+</span>
+
+</td>
+
+<!-- MAC ADDRESS -->
 <td style="font-size:12px;">
 <%= d.macAddress || "-" %>
 </td>
 
-<td style="font-size:12px; font-family:monospace;">
-••••••••••
+<!-- ACTION -->
+<td>
+
+<a href="/admin/devices/<%= d.deviceId %>/config"
+   class="btn btn-green"
+   style="padding:6px 12px;font-size:12px;">
+   Configure
+</a>
+
 </td>
 
 </tr>
