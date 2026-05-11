@@ -4,49 +4,28 @@
 Device Setup & Configuration
 </h2>
 
-<!-- =========================
-     CREATE DEVICE FORM
-========================= -->
-
 <form action="/admin/devices/create" method="POST">
 
 <div class="grid">
 
 <div class="form-group">
 <label>Device ID</label>
-<input
-    name="deviceId"
-    class="form-control"
-    placeholder="e.g. DEV-001"
-    required
-/>
+<input name="deviceId" class="form-control" required/>
 </div>
 
 <div class="form-group">
 <label>Device Name</label>
-<input
-    name="name"
-    class="form-control"
-    placeholder="Solar System A"
-/>
+<input name="name" class="form-control"/>
 </div>
 
 <div class="form-group">
-<label>Installation Location</label>
-<input
-    name="location"
-    class="form-control"
-    placeholder="Nairobi - Westlands"
-/>
+<label>Location</label>
+<input name="location" class="form-control"/>
 </div>
 
 <div class="form-group">
-<label>MAC Address (Optional)</label>
-<input
-    name="macAddress"
-    class="form-control"
-    placeholder="AA:BB:CC:DD:EE:FF"
-/>
+<label>MAC Address</label>
+<input name="macAddress" class="form-control"/>
 </div>
 
 </div>
@@ -54,7 +33,7 @@ Device Setup & Configuration
 <br>
 
 <button class="btn btn-green">
-Create & Generate Configuration
+Create Device
 </button>
 
 </form>
@@ -63,212 +42,250 @@ Create & Generate Configuration
 
 <br>
 
-
-<!-- =========================
-     DEVICE CREDENTIALS DISPLAY
-========================= -->
-
 <% if(device){ %>
 
 <div class="card">
 
-<h3 style="margin-bottom:20px;">
-Device Credentials
-</h3>
+<h3>Device Credentials</h3>
 
-<div class="grid">
-
-<div>
-<label>Device ID</label>
-<div class="badge"><%= device.deviceId %></div>
-</div>
-
-<div>
-<label>API Key</label>
-<div class="badge" style="word-break:break-all;">
-<%= device.apiKey %>
-</div>
-</div>
-
-<div>
-<label>MAC Address</label>
-<div class="badge">
-<%= device.macAddress || "Not set" %>
-</div>
-</div>
-
-<div>
-<label>Server URL</label>
-<div class="badge" style="word-break:break-all;">
-<%= serverUrl %>
-</div>
-</div>
-
-</div>
+<p><strong>Device ID:</strong> <%= device.deviceId %></p>
+<p><strong>API Key:</strong> <%= device.apiKey %></p>
+<p><strong>Server:</strong> <%= serverUrl %></p>
 
 </div>
 
 <br>
-
-
-<!-- =========================
-     ESP32 FIRMWARE TEMPLATE
-========================= -->
 
 <div class="card">
 
-<div style="display:flex;justify-content:space-between;align-items:center;">
-
-<h3>ESP32 Firmware (Copy & Upload)</h3>
-
-<button onclick="copyCode()" class="btn btn-green">
-Copy Code
-</button>
-
+<div style="display:flex;justify-content:space-between;">
+<h3>ESP32 Firmware</h3>
+<button onclick="copyCode()" class="btn btn-green">Copy</button>
 </div>
 
 <br>
 
-<div style="
-background:#111;
-color:#0f0;
-padding:20px;
-border-radius:12px;
-font-family:monospace;
-font-size:13px;
-overflow:auto;
-max-height:500px;
-">
-
-<pre id="codeBlock">
+<pre id="codeBlock" style="background:#111;color:#0f0;padding:20px;border-radius:10px;overflow:auto;max-height:600px;">
 
 #include &lt;WiFi.h&gt;
 #include &lt;HTTPClient.h&gt;
 
 // =========================
-// WIFI CONFIG
+// WIFI
 // =========================
 const char* ssid = "YOUR_WIFI";
 const char* password = "YOUR_PASSWORD";
 
 // =========================
-// SERVER CONFIG
+// SERVER
 // =========================
-const char* serverUrl = "<%= serverUrl %>";
+const char* baseUrl = "<%= serverUrl %>/api/device";
 
 // =========================
-// DEVICE AUTH
+// AUTH
 // =========================
 const char* deviceId = "<%= device.deviceId %>";
-const char* apiKey = "<%= device.apiKey %>";
+const char* apiKey   = "<%= device.apiKey %>";
 
 // =========================
-// PINS (EDIT BASED ON YOUR HARDWARE)
+// PINS
 // =========================
-#define SOLAR_VOLTAGE_PIN 34
-#define SOLAR_CURRENT_PIN 35
-#define BATTERY_VOLTAGE_PIN 32
-#define LOAD_CURRENT_PIN 33
+#define SOLAR_VOLT 34
+#define BATTERY_VOLT 35
+#define CURRENT_PIN 32
 
+#define RELAY_SOLAR 25
+#define RELAY_BATTERY 26
+#define RELAY_GRID 27
+
+// =========================
+// SYSTEM STATE
+// =========================
+String activeSource = "solar";
+unsigned long lastSwitchTime = 0;
+const int switchDelay = 5000;
+
+// =========================
+// SETUP
+// =========================
 void setup(){
-    Serial.begin(115200);
 
-    WiFi.begin(ssid, password);
+  Serial.begin(115200);
 
-    while(WiFi.status() != WL_CONNECTED){
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
-    }
+  pinMode(RELAY_SOLAR, OUTPUT);
+  pinMode(RELAY_BATTERY, OUTPUT);
+  pinMode(RELAY_GRID, OUTPUT);
 
-    Serial.println("Connected!");
+  connectWiFi();
 }
 
+// =========================
+// LOOP
+// =========================
 void loop(){
 
-    if(WiFi.status() == WL_CONNECTED){
+  float solarV = readVoltage(SOLAR_VOLT);
+  float batteryV = readVoltage(BATTERY_VOLT);
+  float current = readCurrent();
 
-        HTTPClient http;
+  float solarPower = solarV * current;
+  float batteryPower = batteryV * current;
+  float loadPower = batteryV * current;
 
-        http.begin(serverUrl);
-        http.addHeader("Content-Type", "application/json");
+  decideSource(solarV, batteryV, loadPower);
 
-        // =========================
-        // MOCK DATA (REPLACE WITH REAL SENSOR READINGS)
-        // =========================
+  sendSolar(solarV, current);
+  sendBattery(batteryV, current);
+  sendGrid(current);
 
-        float solarVoltage = analogRead(SOLAR_VOLTAGE_PIN);
-        float solarCurrent = analogRead(SOLAR_CURRENT_PIN);
+  sendHeartbeat();
 
-        float batteryVoltage = analogRead(BATTERY_VOLTAGE_PIN);
-        float loadCurrent = analogRead(LOAD_CURRENT_PIN);
+  delay(5000);
+}
 
-        float solarPower = solarVoltage * solarCurrent;
-        float loadPower = loadCurrent * 220;
+// =========================
+// WIFI
+// =========================
+void connectWiFi(){
 
-        String activeSource = "solar";
+  WiFi.begin(ssid, password);
 
-        // =========================
-        // BASIC SOURCE LOGIC
-        // =========================
+  while(WiFi.status() != WL_CONNECTED){
+    delay(500);
+  }
+}
 
-        if(solarPower < loadPower){
-            if(batteryVoltage > 11){
-                activeSource = "battery";
-            }else{
-                activeSource = "grid";
-            }
-        }
+// =========================
+// SENSOR FUNCTIONS
+// =========================
+float readVoltage(int pin){
+  float raw = analogRead(pin);
+  float voltage = raw * (3.3 / 4095.0) * 11; // calibrate
+  return voltage;
+}
 
-        // =========================
-        // JSON PAYLOAD
-        // =========================
+float readCurrent(){
+  float raw = analogRead(CURRENT_PIN);
+  float current = raw * (3.3 / 4095.0);
+  return current;
+}
 
-        String payload = "{";
-        payload += "\"deviceId\":\"" + String(deviceId) + "\",";
-        payload += "\"apiKey\":\"" + String(apiKey) + "\",";
+// =========================
+// DECISION ENGINE
+// =========================
+void decideSource(float solarV, float batteryV, float loadPower){
 
-        payload += "\"solar\":{";
-        payload += "\"voltage\":" + String(solarVoltage) + ",";
-        payload += "\"current\":" + String(solarCurrent) + ",";
-        payload += "\"power\":" + String(solarPower);
-        payload += "},";
+  if(millis() - lastSwitchTime &lt; switchDelay){
+    return;
+  }
 
-        payload += "\"battery\":{";
-        payload += "\"voltage\":" + String(batteryVoltage);
-        payload += "},";
+  String previous = activeSource;
 
-        payload += "\"activeSource\":\"" + activeSource + "\",";
-        payload += "\"loadPower\":" + String(loadPower);
+  if(solarV &gt; 18){
+    switchSolar();
+  }
+  else if(batteryV &gt; 12){
+    switchBattery();
+  }
+  else{
+    switchGrid();
+  }
 
-        payload += "}";
+  if(previous != activeSource){
+    lastSwitchTime = millis();
+    sendTransition(previous, activeSource, solarV, batteryV, loadPower);
+  }
+}
 
-        int responseCode = http.POST(payload);
+// =========================
+// SWITCHING
+// =========================
+void switchSolar(){
+  digitalWrite(RELAY_SOLAR, HIGH);
+  digitalWrite(RELAY_BATTERY, LOW);
+  digitalWrite(RELAY_GRID, LOW);
+  activeSource = "solar";
+}
 
-        Serial.println(responseCode);
+void switchBattery(){
+  digitalWrite(RELAY_SOLAR, LOW);
+  digitalWrite(RELAY_BATTERY, HIGH);
+  digitalWrite(RELAY_GRID, LOW);
+  activeSource = "battery";
+}
 
-        http.end();
-    }
+void switchGrid(){
+  digitalWrite(RELAY_SOLAR, LOW);
+  digitalWrite(RELAY_BATTERY, LOW);
+  digitalWrite(RELAY_GRID, HIGH);
+  activeSource = "grid";
+}
 
-    delay(5000); // send every 5 seconds
+// =========================
+// API SENDERS
+// =========================
+void sendSolar(float v, float c){
+  send("/solar", "\"voltage\":" + String(v) + ",\"current\":" + String(c) + ",\"power\":" + String(v*c));
+}
+
+void sendBattery(float v, float c){
+  send("/battery", "\"voltage\":" + String(v) + ",\"current\":" + String(c) + ",\"power\":" + String(v*c) + ",\"percentage\":" + String(map(v,11,13,0,100)));
+}
+
+void sendGrid(float c){
+  send("/grid", "\"voltage\":220,\"current\":" + String(c) + ",\"power\":" + String(220*c) + ",\"frequency\":50");
+}
+
+void sendHeartbeat(){
+  send("/heartbeat", "");
+}
+
+// =========================
+// TRANSITION LOG
+// =========================
+void sendTransition(String from, String to, float solarV, float batteryV, float load){
+
+  String data = "\"fromSource\":\""+from+"\",\"toSource\":\""+to+"\",\"reason\":\"auto\",\"solarVoltage\":"+String(solarV)+",\"batteryVoltage\":"+String(batteryV)+",\"gridVoltage\":220,\"loadPower\":"+String(load);
+
+  send("/transition", data);
+}
+
+// =========================
+// GENERIC SENDER
+// =========================
+void send(String endpoint, String extra){
+
+  if(WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+
+  http.begin(String(baseUrl) + endpoint);
+  http.addHeader("Content-Type", "application/json");
+
+  String payload = "{";
+  payload += "\"deviceId\":\"" + String(deviceId) + "\",";
+  payload += "\"apiKey\":\"" + String(apiKey) + "\"";
+
+  if(extra.length() &gt; 0){
+    payload += "," + extra;
+  }
+
+  payload += "}";
+
+  http.POST(payload);
+  http.end();
 }
 
 </pre>
 
 </div>
 
-</div>
-
 <% } %>
-
 
 <script>
 function copyCode(){
-
-    const code =
-    document.getElementById("codeBlock").innerText;
-
+    const code = document.getElementById("codeBlock").innerText;
     navigator.clipboard.writeText(code);
-
-    alert("Code copied!");
+    alert("Firmware copied");
 }
 </script>
