@@ -1,0 +1,261 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+// =========================
+// WIFI CONFIG
+// =========================
+const char* ssid = "YOUR_WIFI";
+const char* password = "YOUR_PASSWORD";
+
+// =========================
+// BACKEND API
+// =========================
+const char* server = "http://your-server.com/api/device";
+
+// Device credentials
+const char* deviceId = "DEV123";
+const char* apiKey   = "API_KEY_HERE";
+
+// =========================
+// PIN DEFINITIONS
+// =========================
+
+// Analog inputs
+#define SOLAR_VOLT_PIN 34
+#define BATTERY_VOLT_PIN 35
+#define CURRENT_PIN 32
+
+// Relays
+#define RELAY_SOLAR   25
+#define RELAY_BATTERY 26
+#define RELAY_GRID    27
+
+// =========================
+// VARIABLES
+// =========================
+float solarVoltage = 0;
+float batteryVoltage = 0;
+float current = 0;
+float loadPower = 0;
+
+String activeSource = "solar";
+
+// =========================
+// SETUP
+// =========================
+void setup(){
+
+  Serial.begin(115200);
+
+  pinMode(RELAY_SOLAR, OUTPUT);
+  pinMode(RELAY_BATTERY, OUTPUT);
+  pinMode(RELAY_GRID, OUTPUT);
+
+  connectWiFi();
+}
+
+
+// =========================
+// LOOP
+// =========================
+void loop(){
+
+  readSensors();
+
+  decideSource();
+
+  sendData();
+
+  delay(5000);
+}
+
+
+// =========================
+// WIFI
+// =========================
+void connectWiFi(){
+
+  WiFi.begin(ssid, password);
+
+  while(WiFi.status() != WL_CONNECTED){
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nConnected");
+}
+
+
+// =========================
+// SENSOR READING
+// =========================
+void readSensors(){
+
+  solarVoltage = analogRead(SOLAR_VOLT_PIN) * (3.3 / 4095.0) * 11; // adjust divider
+  batteryVoltage = analogRead(BATTERY_VOLT_PIN) * (3.3 / 4095.0) * 11;
+  current = analogRead(CURRENT_PIN) * (3.3 / 4095.0);
+
+  loadPower = batteryVoltage * current;
+
+  Serial.println("Solar: " + String(solarVoltage));
+  Serial.println("Battery: " + String(batteryVoltage));
+}
+
+
+// =========================
+// SOURCE DECISION
+// =========================
+void decideSource(){
+
+  String previousSource = activeSource;
+
+  if(solarVoltage > 18){
+
+    switchToSolar();
+
+  }else if(batteryVoltage > 12){
+
+    switchToBattery();
+
+  }else{
+
+    switchToGrid();
+  }
+
+  // log transition
+  if(previousSource != activeSource){
+
+    sendTransition(previousSource, activeSource);
+  }
+}
+
+
+// =========================
+// SWITCH FUNCTIONS
+// =========================
+void switchToSolar(){
+
+  digitalWrite(RELAY_SOLAR, HIGH);
+  digitalWrite(RELAY_BATTERY, LOW);
+  digitalWrite(RELAY_GRID, LOW);
+
+  activeSource = "solar";
+}
+
+
+void switchToBattery(){
+
+  digitalWrite(RELAY_SOLAR, LOW);
+  digitalWrite(RELAY_BATTERY, HIGH);
+  digitalWrite(RELAY_GRID, LOW);
+
+  activeSource = "battery";
+}
+
+
+void switchToGrid(){
+
+  digitalWrite(RELAY_SOLAR, LOW);
+  digitalWrite(RELAY_BATTERY, LOW);
+  digitalWrite(RELAY_GRID, HIGH);
+
+  activeSource = "grid";
+}
+
+
+// =========================
+// SEND SENSOR DATA
+// =========================
+void sendData(){
+
+  if(WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+
+  // ===== SOLAR =====
+  http.begin(String(server) + "/solar");
+  http.addHeader("Content-Type", "application/json");
+
+  String solarPayload = "{";
+  solarPayload += "\"deviceId\":\"" + String(deviceId) + "\",";
+  solarPayload += "\"apiKey\":\"" + String(apiKey) + "\",";
+  solarPayload += "\"voltage\":" + String(solarVoltage) + ",";
+  solarPayload += "\"current\":" + String(current) + ",";
+  solarPayload += "\"power\":" + String(solarVoltage * current);
+  solarPayload += "}";
+
+  http.POST(solarPayload);
+  http.end();
+
+  // ===== BATTERY =====
+  http.begin(String(server) + "/battery");
+  http.addHeader("Content-Type", "application/json");
+
+  String batteryPayload = "{";
+  batteryPayload += "\"deviceId\":\"" + String(deviceId) + "\",";
+  batteryPayload += "\"apiKey\":\"" + String(apiKey) + "\",";
+  batteryPayload += "\"voltage\":" + String(batteryVoltage) + ",";
+  batteryPayload += "\"current\":" + String(current) + ",";
+  batteryPayload += "\"power\":" + String(batteryVoltage * current) + ",";
+  batteryPayload += "\"percentage\":" + String(map(batteryVoltage, 11, 13, 0, 100));
+  batteryPayload += "}";
+
+  http.POST(batteryPayload);
+  http.end();
+
+  // ===== GRID (dummy) =====
+  http.begin(String(server) + "/grid");
+  http.addHeader("Content-Type", "application/json");
+
+  String gridPayload = "{";
+  gridPayload += "\"deviceId\":\"" + String(deviceId) + "\",";
+  gridPayload += "\"apiKey\":\"" + String(apiKey) + "\",";
+  gridPayload += "\"voltage\":220,";
+  gridPayload += "\"current\":" + String(current) + ",";
+  gridPayload += "\"power\":" + String(220 * current) + ",";
+  gridPayload += "\"frequency\":50";
+  gridPayload += "}";
+
+  http.POST(gridPayload);
+  http.end();
+
+  // ===== HEARTBEAT =====
+  http.begin(String(server) + "/heartbeat");
+  http.addHeader("Content-Type", "application/json");
+
+  String hb = "{";
+  hb += "\"deviceId\":\"" + String(deviceId) + "\",";
+  hb += "\"apiKey\":\"" + String(apiKey) + "\"}";
+  
+  http.POST(hb);
+  http.end();
+}
+
+
+// =========================
+// SEND TRANSITION
+// =========================
+void sendTransition(String from, String to){
+
+  if(WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+
+  http.begin(String(server) + "/transition");
+  http.addHeader("Content-Type", "application/json");
+
+  String payload = "{";
+  payload += "\"deviceId\":\"" + String(deviceId) + "\",";
+  payload += "\"apiKey\":\"" + String(apiKey) + "\",";
+  payload += "\"fromSource\":\"" + from + "\",";
+  payload += "\"toSource\":\"" + to + "\",";
+  payload += "\"reason\":\"auto switch\",";
+  payload += "\"solarVoltage\":" + String(solarVoltage) + ",";
+  payload += "\"batteryVoltage\":" + String(batteryVoltage) + ",";
+  payload += "\"gridVoltage\":220,";
+  payload += "\"loadPower\":" + String(loadPower);
+  payload += "}";
+
+  http.POST(payload);
+  http.end();
+}
