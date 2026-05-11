@@ -1,46 +1,37 @@
-const DeviceStatus = require("../modules/DeviceStatus");
-const SolarReading = require("../modules/SolarReading");
-const BatteryReading = require("../modules/BatteryReading");
-const GridReading = require("../modules/GridReading");
+const DeviceStatus =
+require("../modules/DeviceStatus");
+
+const SolarReading =
+require("../modules/SolarReading");
+
+const BatteryReading =
+require("../modules/BatteryReading");
+
+const GridReading =
+require("../modules/GridReading");
+
+const SourceTransition =
+require("../modules/SourceTransition");
 
 
 // =========================
-// AUTH DEVICE
+// VALIDATE DEVICE
 // =========================
-const validateDevice = async (deviceId, apiKey) => {
-
-    const device = await DeviceStatus.findOne({
-        deviceId,
-        apiKey
-    });
-
-    if (!device) {
-        throw new Error("Invalid device credentials");
-    }
-
-    return device;
-};
-
-
-// =========================
-// REGISTER DEVICE
-// =========================
-exports.registerDevice = async (data) => {
-
-    const { deviceId, apiKey, macAddress } = data;
+exports.validateDevice = async(
+    deviceId,
+    apiKey
+)=>{
 
     const device =
-    await validateDevice(deviceId, apiKey);
+    await DeviceStatus.findOne({ deviceId });
 
-    // Save MAC if not set
-    if (!device.macAddress) {
-        device.macAddress = macAddress;
+    if(!device){
+        throw new Error("Device not found");
     }
 
-    device.internetStatus = "online";
-    device.lastHeartbeat = new Date();
-
-    await device.save();
+    if(device.apiKey !== apiKey){
+        throw new Error("Unauthorized device");
+    }
 
     return device;
 };
@@ -49,113 +40,100 @@ exports.registerDevice = async (data) => {
 // =========================
 // HEARTBEAT
 // =========================
-exports.heartbeat = async (data) => {
+exports.updateHeartbeat = async(deviceId)=>{
 
-    const { deviceId, apiKey } = data;
+    return await DeviceStatus.findOneAndUpdate(
 
-    const device =
-    await validateDevice(deviceId, apiKey);
+        { deviceId },
 
-    device.lastHeartbeat = new Date();
-    device.internetStatus = "online";
+        {
+            lastHeartbeat:new Date(),
+            internetStatus:"online"
+        },
 
-    await device.save();
+        { new:true }
+    );
 };
 
 
 // =========================
-// SOLAR DATA
+// SAVE SOLAR
 // =========================
-exports.saveSolar = async (data) => {
-
-    const {
-        deviceId,
-        apiKey,
-        voltage,
-        current,
-        temperature
-    } = data;
-
-    const device =
-    await validateDevice(deviceId, apiKey);
-
-    const power = voltage * current;
-
-    const efficiency = voltage > 0
-        ? (power / (voltage * current)) * 100
-        : 0;
+exports.saveSolarReading = async(
+    device,
+    data
+)=>{
 
     await SolarReading.create({
-        clientId: device.clientId,
-        voltage,
-        current,
-        power,
-        efficiency,
-        temperature
+        clientId:device.clientId,
+        ...data
     });
 
-    device.lastSolarPower = power;
+    // update device snapshot
+    device.lastSolarPower = data.power || 0;
+    device.solarActive = true;
+
     await device.save();
 };
 
 
 // =========================
-// BATTERY DATA
+// SAVE BATTERY
 // =========================
-exports.saveBattery = async (data) => {
-
-    const {
-        deviceId,
-        apiKey,
-        voltage,
-        current,
-        percentage,
-        temperature
-    } = data;
-
-    const device =
-    await validateDevice(deviceId, apiKey);
-
-    const power = voltage * current;
+exports.saveBatteryReading = async(
+    device,
+    data
+)=>{
 
     await BatteryReading.create({
-        clientId: device.clientId,
-        voltage,
-        current,
-        power,
-        percentage,
-        temperature
+        clientId:device.clientId,
+        ...data
     });
 
-    device.lastBatteryLevel = percentage;
+    device.lastBatteryLevel =
+    data.percentage || 0;
+
+    device.batteryActive = true;
+
     await device.save();
 };
 
 
 // =========================
-// GRID DATA
+// SAVE GRID
 // =========================
-exports.saveGrid = async (data) => {
-
-    const {
-        deviceId,
-        apiKey,
-        voltage,
-        current,
-        frequency
-    } = data;
-
-    const device =
-    await validateDevice(deviceId, apiKey);
-
-    const power = voltage * current;
+exports.saveGridReading = async(
+    device,
+    data
+)=>{
 
     await GridReading.create({
-        clientId: device.clientId,
-        voltage,
-        current,
-        power,
-        frequency,
-        available: voltage > 0
+        clientId:device.clientId,
+        available:true,
+        ...data
     });
+
+    device.gridActive = true;
+
+    await device.save();
+};
+
+
+// =========================
+// LOG TRANSITION
+// =========================
+exports.logTransition = async(
+    device,
+    data
+)=>{
+
+    await SourceTransition.create({
+        clientId:device.clientId,
+        ...data
+    });
+
+    // update active source
+    device.activeSource = data.toSource;
+
+    await device.save();
 };
