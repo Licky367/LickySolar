@@ -3,105 +3,194 @@ require("../services/deviceService");
 
 
 // =========================
-// REGISTER DEVICE
-// =========================
-exports.registerDevice = async (req, res) => {
-
-    try {
-
-        const result =
-        await deviceService.registerDevice(req.body);
-
-        res.json({
-            success: true,
-            data: result
-        });
-
-    } catch (error) {
-
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
-    }
-};
-
-
-// =========================
 // HEARTBEAT
 // =========================
-exports.heartbeat = async (req, res) => {
+exports.heartbeat = async(req,res)=>{
+    try{
 
-    try {
+        const { deviceId, apiKey } = req.body;
 
-        await deviceService.heartbeat(req.body);
+        await deviceService.validateDevice(
+            deviceId,
+            apiKey
+        );
 
-        res.json({ success: true });
+        await deviceService.updateHeartbeat(
+            deviceId
+        );
 
-    } catch (error) {
+        res.json({ success:true });
 
+    }catch(error){
         res.status(400).json({
-            error: error.message
+            error:error.message
         });
     }
 };
 
 
 // =========================
-// SOLAR DATA
+// SOLAR READING
 // =========================
-exports.sendSolarData = async (req, res) => {
+exports.sendSolarReading = async(req,res)=>{
+    try{
 
-    try {
+        const {
+            deviceId,
+            apiKey,
+            voltage,
+            current,
+            power,
+            temperature
+        } = req.body;
 
-        await deviceService.saveSolar(req.body);
+        const device =
+        await deviceService.validateDevice(
+            deviceId,
+            apiKey
+        );
 
-        res.json({ success: true });
+        await deviceService.saveSolarReading(
+            device,
+            { voltage, current, power, temperature }
+        );
 
-    } catch (error) {
+        res.json({ success:true });
 
+    }catch(error){
         res.status(400).json({
-            error: error.message
+            error:error.message
         });
     }
 };
 
 
 // =========================
-// BATTERY DATA
+// BATTERY READING
 // =========================
-exports.sendBatteryData = async (req, res) => {
+exports.sendBatteryReading = async(req,res)=>{
+    try{
 
-    try {
+        const {
+            deviceId,
+            apiKey,
+            voltage,
+            current,
+            power,
+            percentage,
+            temperature
+        } = req.body;
 
-        await deviceService.saveBattery(req.body);
+        const device =
+        await deviceService.validateDevice(
+            deviceId,
+            apiKey
+        );
 
-        res.json({ success: true });
+        await deviceService.saveBatteryReading(
+            device,
+            {
+                voltage,
+                current,
+                power,
+                percentage,
+                temperature
+            }
+        );
 
-    } catch (error) {
+        res.json({ success:true });
 
+    }catch(error){
         res.status(400).json({
-            error: error.message
+            error:error.message
         });
     }
 };
 
 
 // =========================
-// GRID DATA
+// GRID READING
 // =========================
-exports.sendGridData = async (req, res) => {
+exports.sendGridReading = async(req,res)=>{
+    try{
 
-    try {
+        const {
+            deviceId,
+            apiKey,
+            voltage,
+            current,
+            power,
+            frequency
+        } = req.body;
 
-        await deviceService.saveGrid(req.body);
+        const device =
+        await deviceService.validateDevice(
+            deviceId,
+            apiKey
+        );
 
-        res.json({ success: true });
+        await deviceService.saveGridReading(
+            device,
+            {
+                voltage,
+                current,
+                power,
+                frequency
+            }
+        );
 
-    } catch (error) {
+        res.json({ success:true });
 
+    }catch(error){
         res.status(400).json({
-            error: error.message
+            error:error.message
+        });
+    }
+};
+
+
+// =========================
+// SOURCE TRANSITION
+// =========================
+exports.logTransition = async(req,res)=>{
+    try{
+
+        const {
+            deviceId,
+            apiKey,
+            fromSource,
+            toSource,
+            reason,
+            solarVoltage,
+            batteryVoltage,
+            gridVoltage,
+            loadPower
+        } = req.body;
+
+        const device =
+        await deviceService.validateDevice(
+            deviceId,
+            apiKey
+        );
+
+        await deviceService.logTransition(
+            device,
+            {
+                fromSource,
+                toSource,
+                reason,
+                solarVoltage,
+                batteryVoltage,
+                gridVoltage,
+                loadPower
+            }
+        );
+
+        res.json({ success:true });
+
+    }catch(error){
+        res.status(400).json({
+            error:error.message
         });
     }
 };
